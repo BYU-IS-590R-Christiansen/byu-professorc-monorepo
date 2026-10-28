@@ -205,7 +205,7 @@ cd devops/bash
    DB_CONNECTION=mysql
    DB_HOST=mysql
    DB_PORT=3306
-   DB_DATABASE=app_app
+   DB_DATABASE=app_db
    DB_USERNAME=app_user
    DB_PASSWORD=app_password
    ```

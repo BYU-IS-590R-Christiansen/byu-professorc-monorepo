@@ -43,7 +43,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: byu_590r_app_test
+          MYSQL_DATABASE: app_db
           MYSQL_USER: byu_user
           MYSQL_PASSWORD: byu_password
         ports:
@@ -81,7 +81,7 @@ jobs:
           sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
           sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
           sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=byu_590r_app_test/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=app_app_test/' .env
           sed -i 's/DB_USERNAME=.*/DB_USERNAME=byu_user/' .env
           sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=byu_password/' .env
           # Override with secrets if set
@@ -154,7 +154,7 @@ jobs:
           grep -q '^DB_CONNECTION=' .env && sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env || echo 'DB_CONNECTION=mysql' >> .env
           sed -i 's/^DB_HOST=.*/DB_HOST=localhost/' .env
           sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE:-app_app}/" .env
+          sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE:-app_db}/" .env
           sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME:-app_user}/" .env
           sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD:-app_password}/" .env
           sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
@@ -213,8 +213,7 @@ jobs:
           done
           sudo mysql -e "SELECT 1" >/dev/null
 
-          # GitHub secrets often use byu_user/byu_590r_app; Terraform user_data creates app_user/app_app.
-          # Ensure the .env credentials exist so migrate is not rejected with 1045.
+          # Ensure the .env MySQL user/database exist so migrate is not rejected with 1045.
           SQL_PASS=$(printf "%s" "$DB_PASS" | sed "s/'/''/g")
           SQL_USER=$(printf "%s" "$DB_USER" | sed "s/'/''/g")
           SQL_NAME=$(printf "%s" "$DB_NAME" | sed 's/`/``/g')

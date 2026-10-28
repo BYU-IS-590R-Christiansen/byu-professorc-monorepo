@@ -18,10 +18,10 @@ start:
 		fi; \
 		echo "Waiting for MySQL... ($$i/30)"; sleep 2; \
 	done && if [ $$mysql_ready -ne 1 ]; then echo "ERROR: MySQL did not become ready in time."; exit 1; fi
-	@echo "Ensuring database 'app_app' exists..."
-	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "CREATE DATABASE IF NOT EXISTS app_app;" 2>/dev/null || true
+	@echo "Ensuring database 'app_db' exists..."
+	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "CREATE DATABASE IF NOT EXISTS app_db;" 2>/dev/null || true
 	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "CREATE USER IF NOT EXISTS 'app_user'@'%' IDENTIFIED BY 'app_password';" 2>/dev/null || true
-	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "GRANT ALL PRIVILEGES ON app_app.* TO 'app_user'@'%'; FLUSH PRIVILEGES;" 2>/dev/null || true
+	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "GRANT ALL PRIVILEGES ON app_db.* TO 'app_user'@'%'; FLUSH PRIVILEGES;" 2>/dev/null || true
 	@echo "Using Laravel backend dependencies from local install (backend/vendor)..."
 	@echo "Clearing Laravel caches and regenerating autoloader..."
 	cd backend && docker compose exec -T app composer dump-autoload -o || true
