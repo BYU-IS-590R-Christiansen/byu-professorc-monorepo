@@ -1,5 +1,6 @@
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
+  profile = var.aws_profile
 }
 
 # Data source to get default VPC
@@ -87,7 +88,7 @@ sudo apt update && sudo apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install PHP 8.3 and extensions
+# Install PHP 8.3 (8.3.36+ security release) and extensions
 sudo apt install -y software-properties-common
 sudo add-apt-repository ppa:ondrej/php -y
 sudo apt update
@@ -288,23 +289,26 @@ resource "random_id" "prod_bucket_suffix" {
   byte_length = 2  # 2 bytes = 4 hex characters
 }
 
-# Generate unique bucket names (matching bash script pattern)
+# Stable bucket names. Do not use timestamp() — that forced a replace on every apply.
 locals {
-  # Compact timestamp for unique bucket names (YYYYMMDDhhmmss)
-  bucket_timestamp = formatdate("YYYYMMDDhhmmss", timestamp())
-
-  dev_bucket_name  = "${var.project_name}-dev-${local.bucket_timestamp}"
-  prod_bucket_name = "${var.project_name}-prod-${local.bucket_timestamp}-${random_id.prod_bucket_suffix.hex}"
+  dev_bucket_name  = "${var.project_name}-dev"
+  prod_bucket_name = "${var.project_name}-prod-${random_id.prod_bucket_suffix.hex}"
 }
 
 # S3 Bucket - Dev
 resource "aws_s3_bucket" "dev" {
-  bucket = local.dev_bucket_name
+  bucket        = local.dev_bucket_name
+  force_destroy = true
 
   tags = {
     Name        = "byu-590r-dev"
     Project     = "byu-590r"
     Environment = "development"
+  }
+
+  # Keep the existing timestamped name already in state (e.g. byu-590r-dev-20260402013907)
+  lifecycle {
+    ignore_changes = [bucket]
   }
 }
 
@@ -319,12 +323,17 @@ resource "aws_s3_bucket_public_access_block" "dev" {
 
 # S3 Bucket - Prod
 resource "aws_s3_bucket" "prod" {
-  bucket = local.prod_bucket_name
+  bucket        = local.prod_bucket_name
+  force_destroy = true
 
   tags = {
     Name        = "byu-590r-prod"
     Project     = "byu-590r"
     Environment = "production"
+  }
+
+  lifecycle {
+    ignore_changes = [bucket]
   }
 }
 

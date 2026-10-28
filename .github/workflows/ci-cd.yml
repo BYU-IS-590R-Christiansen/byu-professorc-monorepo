@@ -56,7 +56,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.3.36"
           extensions: mbstring, dom, fileinfo, mysql
           coverage: none
           # Composer is installed by default; no curl to getcomposer.org
@@ -195,7 +195,7 @@ jobs:
 
       - name: Migrate and restart backend
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "export PATH=/usr/bin:/usr/local/bin:\$PATH && cd /var/www/html/api && php artisan config:clear && php artisan migrate --force && php artisan migrate:fresh --seed --force 2>/dev/null || true && sudo systemctl restart apache2"
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "export PATH=/usr/bin:/usr/local/bin:\$PATH && cd /var/www/html/api && php artisan config:clear && php artisan migrate:fresh --seed --force && sudo systemctl restart apache2"
 
       - name: Deploy frontend
         run: |

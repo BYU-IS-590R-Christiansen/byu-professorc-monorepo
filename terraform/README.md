@@ -12,7 +12,7 @@ This Terraform configuration replicates the functionality of `devops/bash/setup-
 
 - **EC2 Instance**: `t2.micro` instance with:
   - Node.js 18
-  - PHP 8.3 with required extensions
+  - PHP 8.3.36 with required extensions
   - Composer
   - MySQL
   - Apache with virtual hosts configured

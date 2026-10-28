@@ -3,6 +3,7 @@
 
 # AWS Configuration
 aws_region  = "us-west-1"
+aws_profile = "default" # class account 728053034151 (user/byu), not neuronova
 key_name    = "byu-590r"
 project_name = "byu-590r"
 

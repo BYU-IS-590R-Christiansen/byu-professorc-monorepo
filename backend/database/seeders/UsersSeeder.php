@@ -22,7 +22,8 @@ class UsersSeeder extends Seeder
             'email' => 'testuser@test.com',
             'email_verified_at' => Carbon::now(),
             'avatar' => null,
-            'password' => bcrypt('password12345'),
+            // User model hashes via `password` cast; do not bcrypt here.
+            'password' => 'password12345',
         ];
         
         User::updateOrCreate(

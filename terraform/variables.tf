@@ -4,6 +4,12 @@ variable "aws_region" {
   default     = "us-west-1"
 }
 
+variable "aws_profile" {
+  description = "AWS shared-credentials profile. Default is the class account (user/byu), not neuronova."
+  type        = string
+  default     = "default"
+}
+
 variable "key_name" {
   description = "Name of the AWS EC2 Key Pair"
   type        = string

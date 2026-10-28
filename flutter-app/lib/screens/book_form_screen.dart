@@ -44,13 +44,13 @@ class _BookFormScreenState extends State<BookFormScreen> {
     if (b != null) {
       _nameController.text = b.name;
       _descriptionController.text = b.description;
-      _inventoryController.text =
-          b.inventoryTotalQty?.toString() ?? '1';
+      _inventoryController.text = b.inventoryTotalQty?.toString() ?? '1';
       var gid = b.genreId;
       if (gid != null && !widget.genres.any((g) => g.id == gid)) {
         gid = widget.genres.isNotEmpty ? widget.genres.first.id : null;
       }
-      _genreId = gid ?? (widget.genres.isNotEmpty ? widget.genres.first.id : null);
+      _genreId =
+          gid ?? (widget.genres.isNotEmpty ? widget.genres.first.id : null);
     } else {
       _inventoryController.text = '1';
       _genreId = widget.genres.isNotEmpty ? widget.genres.first.id : null;
@@ -195,8 +195,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
     );
   }
 
-  bool get _hasCoverPreview =>
-      _imageBytes != null && _imageBytes!.isNotEmpty;
+  bool get _hasCoverPreview => _imageBytes != null && _imageBytes!.isNotEmpty;
 
   /// Must match one of [widget.genres] or DropdownButton asserts / shows wrong errors.
   int? get _dropdownGenreValue {
@@ -232,7 +231,9 @@ class _BookFormScreenState extends State<BookFormScreen> {
                 onPressed: _submitting ? null : _pickImage,
                 icon: const Icon(Icons.photo_library_outlined),
                 label: Text(
-                  _hasCoverPreview ? 'Change cover image' : 'Choose cover image',
+                  _hasCoverPreview
+                      ? 'Change cover image'
+                      : 'Choose cover image',
                 ),
               ),
               if (_hasCoverPreview) ...[
@@ -269,7 +270,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
               maxLines: 4,
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
-                labelText: 'Description',
+                labelText: 'Description22222',
                 alignLabelWithHint: true,
                 prefixIcon: Icon(Icons.notes_outlined),
               ),
@@ -298,9 +299,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     ),
                   )
                   .toList(),
-              onChanged: _submitting
-                  ? null
-                  : (v) => setState(() => _genreId = v),
+              onChanged:
+                  _submitting ? null : (v) => setState(() => _genreId = v),
             ),
             const SizedBox(height: 16),
             TextFormField(

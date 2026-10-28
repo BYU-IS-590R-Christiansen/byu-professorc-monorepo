@@ -63,7 +63,7 @@ start-dev:
 	cd web-app && npm install
 	@echo "Frontend will be available at: http://localhost:4200"
 	@echo "Backend API: http://localhost:8000"
-	@echo "Database: localhost:3306"
+	@echo "Database: localhost:3307"
 	@echo ""
 	@echo "Starting Angular dev server in background..."
 	cd web-app && npm start &
@@ -79,7 +79,7 @@ start-prod:
 	@echo "All services started!"
 	@echo "Frontend: http://localhost:3000"
 	@echo "Backend API: http://localhost:8000"
-	@echo "Database: localhost:3306"
+	@echo "Database: localhost:3307"
 
 # Run database migrations and seed; used by start
 migrate:

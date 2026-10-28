@@ -7,7 +7,7 @@ use App\Mail\PasswordReset;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -40,24 +40,27 @@ class RegisterController extends BaseController
 
     public function login(Request $request)
     {
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            /** @var \App\Models\User $user **/
-            $user = Auth::user();
-            $user->tokens()->delete();
-            $user->remember_token = null;
-            $user->save();
-            $token = $user->createToken('MyApp');
-            $success['token'] = $token->plainTextToken;
-            $success['name'] = $user->name;
-            $success['avatar'] = null;
-            if (isset($user->avatar)) {
-                $success['avatar'] = $this->getS3Url($user->avatar);
-            }
+        // Stateless API: do not use Auth::attempt() (web guard + session); API routes
+        // do not run session middleware, which can throw and yield a 500 HTML error page.
+        $user = User::where('email', $request->email)->first();
 
-            return $this->sendResponse($success, 'User login successfully.');
-        } else {
+        if (! $user || ! Hash::check($request->password, $user->getAuthPassword())) {
             return $this->sendError('Unauthorised.', ['error' => 'Unauthorised']);
         }
+
+        /** @var \App\Models\User $user */
+        $user->tokens()->delete();
+        $user->remember_token = null;
+        $user->save();
+        $token = $user->createToken('MyApp');
+        $success['token'] = $token->plainTextToken;
+        $success['name'] = $user->name;
+        $success['avatar'] = null;
+        if (isset($user->avatar)) {
+            $success['avatar'] = $this->getS3Url($user->avatar);
+        }
+
+        return $this->sendResponse($success, 'User login successfully.');
     }
 
     public function logout(Request $request)
