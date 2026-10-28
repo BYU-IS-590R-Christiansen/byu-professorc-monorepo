@@ -154,9 +154,9 @@ jobs:
           grep -q '^DB_CONNECTION=' .env && sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env || echo 'DB_CONNECTION=mysql' >> .env
           sed -i 's/^DB_HOST=.*/DB_HOST=localhost/' .env
           sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env
-          sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE:-byu_590r_app}/" .env
-          sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME:-byu_user}/" .env
-          sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD:-byu_password}/" .env
+          sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE:-app_app}/" .env
+          sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME:-app_user}/" .env
+          sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD:-app_password}/" .env
           sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
 
           # Install PHP dependencies; if lock file targets PHP 8.4 (Symfony 8) but server has 8.3, run update
@@ -195,7 +195,41 @@ jobs:
 
       - name: Migrate and restart backend
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "export PATH=/usr/bin:/usr/local/bin:\$PATH && cd /var/www/html/api && php artisan config:clear && php artisan migrate:fresh --seed --force && sudo systemctl restart apache2"
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'REMOTE'
+          set -e
+          export PATH="/usr/bin:/usr/local/bin:$PATH"
+          cd /var/www/html/api
+
+          DB_NAME=$(grep -E '^DB_DATABASE=' .env | tail -1 | cut -d= -f2- | tr -d ' "')
+          DB_USER=$(grep -E '^DB_USERNAME=' .env | tail -1 | cut -d= -f2- | tr -d ' "')
+          DB_PASS=$(grep -E '^DB_PASSWORD=' .env | tail -1 | cut -d= -f2- | tr -d ' "')
+
+          for i in $(seq 1 30); do
+            if sudo mysql -e "SELECT 1" >/dev/null 2>&1; then
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          sudo mysql -e "SELECT 1" >/dev/null
+
+          # GitHub secrets often use byu_user/byu_590r_app; Terraform user_data creates app_user/app_app.
+          # Ensure the .env credentials exist so migrate is not rejected with 1045.
+          SQL_PASS=$(printf "%s" "$DB_PASS" | sed "s/'/''/g")
+          SQL_USER=$(printf "%s" "$DB_USER" | sed "s/'/''/g")
+          SQL_NAME=$(printf "%s" "$DB_NAME" | sed 's/`/``/g')
+          sudo mysql -u root <<SQL
+          CREATE DATABASE IF NOT EXISTS \`${SQL_NAME}\`;
+          CREATE USER IF NOT EXISTS '${SQL_USER}'@'localhost' IDENTIFIED BY '${SQL_PASS}';
+          ALTER USER '${SQL_USER}'@'localhost' IDENTIFIED BY '${SQL_PASS}';
+          GRANT ALL PRIVILEGES ON \`${SQL_NAME}\`.* TO '${SQL_USER}'@'localhost';
+          FLUSH PRIVILEGES;
+          SQL
+
+          php artisan config:clear
+          php artisan migrate:fresh --seed --force
+          sudo systemctl restart apache2
+          REMOTE
 
       - name: Deploy frontend
         run: |

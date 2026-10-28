@@ -121,11 +121,16 @@ sudo mkdir -p /var/www/html/api
 sudo chown -R ubuntu:ubuntu /var/www/html/app
 sudo chown -R ubuntu:ubuntu /var/www/html/api
 
-# Create database and user
+# Create databases/users used by local .env and by GitHub Actions DB_* secrets
 sudo mysql -u root << 'MYSQL_EOF'
 CREATE DATABASE IF NOT EXISTS app_app;
+CREATE DATABASE IF NOT EXISTS byu_590r_app;
 CREATE USER IF NOT EXISTS 'app_user'@'localhost' IDENTIFIED BY 'app_password';
+CREATE USER IF NOT EXISTS 'byu_user'@'localhost' IDENTIFIED BY 'byu_password';
 GRANT ALL PRIVILEGES ON app_app.* TO 'app_user'@'localhost';
+GRANT ALL PRIVILEGES ON app_app.* TO 'byu_user'@'localhost';
+GRANT ALL PRIVILEGES ON byu_590r_app.* TO 'byu_user'@'localhost';
+GRANT ALL PRIVILEGES ON byu_590r_app.* TO 'app_user'@'localhost';
 FLUSH PRIVILEGES;
 MYSQL_EOF
 

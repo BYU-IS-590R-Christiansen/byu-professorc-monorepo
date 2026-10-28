@@ -205,9 +205,9 @@ cd devops/bash
    DB_CONNECTION=mysql
    DB_HOST=mysql
    DB_PORT=3306
-   DB_DATABASE=byu_590r_app
-   DB_USERNAME=byu_user
-   DB_PASSWORD=byu_password
+   DB_DATABASE=app_app
+   DB_USERNAME=app_user
+   DB_PASSWORD=app_password
    ```
 
 3. **Start development environment**:
