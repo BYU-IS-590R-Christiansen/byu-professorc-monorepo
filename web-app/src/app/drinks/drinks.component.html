@@ -1,9 +1,11 @@
-<h4>Basic mat-select</h4>
-<mat-form-field>
-  <mat-label>Favorite food</mat-label>
-  <mat-select>
-    @for (drink of drinks(); track drink.name) {
-      <mat-option [value]="drink.name">{{ drink.name }}</mat-option>
-    }
-  </mat-select>
-</mat-form-field>
+<div class="drinks-container">
+  <h4>Basic mat-select</h4>
+  <mat-form-field class="full-width">
+    <mat-label>Favorite food</mat-label>
+    <mat-select>
+      @for (drink of drinks(); track drink.name) {
+        <mat-option [value]="drink.name">{{ drink.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>

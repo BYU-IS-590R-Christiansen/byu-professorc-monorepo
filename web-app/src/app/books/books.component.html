@@ -1,129 +1,245 @@
 <div class="books-container">
-  @if (!isMobile()) {
-    <div class="buttons-row">
-      <button mat-raised-button color="primary" (click)="sendReport()">
-        <mat-icon>send</mat-icon>
-        Send Report
-      </button>
-      <button mat-raised-button color="primary" (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon>
-        Create
-      </button>
-    </div>
-  }
+  <div class="buttons-row">
+    <button mat-raised-button color="primary" (click)="sendReport()">
+      <mat-icon>send</mat-icon>
+      Send Report
+    </button>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Create
+    </button>
+  </div>
   @if (reportSentMessage()) {
     <mat-card class="alert alert-info" (click)="reportSentMessage.set(null)">
       <mat-card-content>{{ reportSentMessage() }}</mat-card-content>
     </mat-card>
   }
 
-  <mat-grid-list cols="4" rowHeight="600px" gutterSize="16px">
+  <p class="books-subtitle">Click a cover to edit it on the back of the card.</p>
+
+  <div class="book-list" role="list">
     @for (book of books(); track book.id) {
-      <mat-grid-tile class="book-grid-tile">
-        <mat-card class="book-card">
-          <mat-card-header>
-            <mat-card-title>{{ book.name }}</mat-card-title>
-            <div class="book-actions">
+      <div
+        class="flip-card"
+        role="listitem"
+        [class.is-flipped]="isBookFlipped(book.id)"
+      >
+        <div class="flip-card-inner">
+          <div class="flip-card-face flip-card-front">
+            <mat-card class="book-card">
               <button
-                mat-icon-button
-                color="warn"
-                (click)="openEditBookDialog(book)"
+                type="button"
+                class="book-cover-button"
+                [attr.aria-expanded]="isBookFlipped(book.id)"
+                [attr.aria-label]="'Edit ' + book.name"
+                (click)="flipBook(book)"
               >
-                <mat-icon>edit</mat-icon>
+                <div class="book-card-image">
+                  @if (book.file) {
+                    <img
+                      [src]="book.file"
+                      [alt]="book.name"
+                      [class.checked-out-image]="(book.available_qty || 0) <= 0"
+                    />
+                  } @else {
+                    <div class="book-card-placeholder">
+                      <mat-icon>menu_book</mat-icon>
+                    </div>
+                  }
+                </div>
+                <div class="book-card-copy">
+                  <h3>{{ book.name }}</h3>
+                  @if (authorNames(book)) {
+                    <p class="book-authors">{{ authorNames(book) }}</p>
+                  }
+                  @if ((book.available_qty || 0) <= 0) {
+                    <p class="checked-out-label">
+                      All checked out — out of inventory
+                    </p>
+                  } @else {
+                    <p class="book-stock">
+                      Stock: {{ book.available_qty }} /
+                      {{ book.inventory_total_qty }} available
+                    </p>
+                  }
+                </div>
               </button>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="openDeleteBookDialog(book)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </mat-card-header>
-          <mat-card-content>
-            <p class="book-description">{{ book.description }}</p>
-
-            @if (book.authors && book.authors.length > 0) {
-              <div class="authors-section">
+              <div class="book-card-actions">
                 <button
-                  mat-button
-                  class="authors-toggle"
-                  (click)="toggleAuthors(book.id)"
+                  mat-raised-button
+                  color="primary"
                   type="button"
+                  (click)="checkedOutBook.set(book)"
+                  [disabled]="book.checked_qty >= book.inventory_total_qty"
                 >
-                  <mat-icon>{{
-                    isAuthorsExpanded(book.id) ? "expand_less" : "expand_more"
-                  }}</mat-icon>
-                  <strong>By: ({{ book.authors.length }})</strong>
+                  Checkout
                 </button>
-                @if (isAuthorsExpanded(book.id)) {
-                  <ul class="authors-list">
-                    @for (author of book.authors; track author.id) {
-                      <li>
-                        {{ author.first_name }} {{ author.last_name }}
-                        @if (author.phones && author.phones.length > 0) {
-                          <div class="phones">
-                            @for (
-                              phone of author.phones;
-                              track phone.phone_number
-                            ) {
-                              <div>
-                                {{ phone.phone_number }} -- {{ phone.type }}
-                              </div>
-                            }
-                          </div>
-                        }
-                      </li>
-                    }
-                  </ul>
+                @if (book.checked_qty > 0) {
+                  <button
+                    mat-raised-button
+                    color="accent"
+                    type="button"
+                    (click)="returnBook(book)"
+                    [disabled]="book.checked_qty <= 0"
+                  >
+                    Return
+                  </button>
                 }
+                <button
+                  mat-icon-button
+                  color="warn"
+                  type="button"
+                  aria-label="Delete book"
+                  (click)="openDeleteBookDialog(book)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
-            }
+            </mat-card>
+          </div>
 
-            <div class="book-image-container">
-              <img
-                [src]="book.file"
-                [class.checked-out-image]="(book.available_qty || 0) <= 0"
-                [alt]="book.name"
-                class="book-image"
-              />
-            </div>
-
-            @if ((book.available_qty || 0) <= 0) {
-              <h3 class="checked-out-label">
-                All Checked Out - Out of Inventory
-              </h3>
-            } @else {
-              <h3>
-                Stock: {{ book.available_qty }} /
-                {{ book.inventory_total_qty }} Available
-              </h3>
-            }
-          </mat-card-content>
-          <mat-card-actions>
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="checkedOutBook.set(book)"
-              [disabled]="book.checked_qty >= book.inventory_total_qty"
-            >
-              Checkout
-            </button>
-            @if (book.checked_qty > 0) {
-              <button
-                mat-raised-button
-                color="accent"
-                (click)="returnBook(book)"
-                [disabled]="book.checked_qty <= 0"
-              >
-                Return
-              </button>
-            }
-          </mat-card-actions>
-        </mat-card>
-      </mat-grid-tile>
+          <div
+            class="flip-card-face flip-card-back"
+            [attr.aria-hidden]="!isBookFlipped(book.id)"
+          >
+            <mat-card class="book-card book-card-edit">
+              <mat-card-header>
+                <mat-card-title>Edit {{ book.name }}</mat-card-title>
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Close editor"
+                  [disabled]="bookIsUpdating()"
+                  (click)="closeFlippedBook()"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-card-header>
+              @if (isBookFlipped(book.id)) {
+                <mat-card-content>
+                  <form [formGroup]="editBookForm">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Book Name*</mat-label>
+                      <input matInput type="text" formControlName="name" />
+                      @if (getFieldError(editBookForm, "name")) {
+                        <mat-error>{{
+                          getFieldError(editBookForm, "name")
+                        }}</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Book description*</mat-label>
+                      <textarea
+                        matInput
+                        formControlName="description"
+                        rows="3"
+                      ></textarea>
+                      @if (getFieldError(editBookForm, "description")) {
+                        <mat-error>{{
+                          getFieldError(editBookForm, "description")
+                        }}</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Book Total Qty In Inventory*</mat-label>
+                      <input
+                        matInput
+                        type="number"
+                        formControlName="inventory_total_qty"
+                      />
+                      @if (getFieldError(editBookForm, "inventory_total_qty")) {
+                        <mat-error>{{
+                          getFieldError(editBookForm, "inventory_total_qty")
+                        }}</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Genre</mat-label>
+                      <mat-select formControlName="genre_id">
+                        @for (genre of genres(); track genre.id) {
+                          <mat-option [value]="genre.id">{{
+                            genre.name
+                          }}</mat-option>
+                        }
+                      </mat-select>
+                      @if (getFieldError(editBookForm, "genre_id")) {
+                        <mat-error>{{
+                          getFieldError(editBookForm, "genre_id")
+                        }}</mat-error>
+                      }
+                    </mat-form-field>
+                    <div class="form-group">
+                      @if (editFileChangeDialogBtn()) {
+                        <div class="form-group">
+                          <label class="file-input-label">File Change</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            (change)="onExistingBookPictureChange($event)"
+                            class="file-input"
+                          />
+                          @if (getFieldError(editBookForm, "file")) {
+                            <div class="file-input-error">
+                              {{ getFieldError(editBookForm, "file") }}
+                            </div>
+                          }
+                        </div>
+                        <button
+                          mat-button
+                          type="button"
+                          (click)="editFileChangeDialogBtn.set(false)"
+                        >
+                          Cancel File Change
+                        </button>
+                      } @else {
+                        <button
+                          mat-button
+                          type="button"
+                          (click)="editFileChangeDialogBtn.set(true)"
+                        >
+                          Change File
+                        </button>
+                      }
+                    </div>
+                    <small>*indicates required field</small>
+                    @if (editBookErrorMessage()) {
+                      <mat-card class="alert alert-danger">{{
+                        editBookErrorMessage()
+                      }}</mat-card>
+                    }
+                  </form>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="bookIsUpdating()"
+                    (click)="closeFlippedBook()"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="button"
+                    [disabled]="!editBookForm.valid || bookIsUpdating()"
+                    (click)="updateBook()"
+                  >
+                    @if (bookIsUpdating()) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                      <span>Updating...</span>
+                    } @else {
+                      <span>Save</span>
+                    }
+                  </button>
+                </mat-card-actions>
+              }
+            </mat-card>
+          </div>
+        </div>
+      </div>
     }
-  </mat-grid-list>
+  </div>
 
   <!-- Checkout Dialog -->
   @if (checkedOutBook()) {
@@ -348,122 +464,4 @@
     </div>
   }
 
-  <!-- Edit Book Dialog -->
-  @if (editBookDialog()) {
-    <div class="modal" (click)="editBookDialog.set(false)">
-      <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
-        <mat-card class="modal-content">
-          <mat-card-header>
-            <mat-card-title>Edit {{ editBook().name }}</mat-card-title>
-            <button mat-icon-button (click)="editBookDialog.set(false)">
-              <mat-icon>close</mat-icon>
-            </button>
-          </mat-card-header>
-          <mat-card-content>
-            <form [formGroup]="editBookForm">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Book Name*</mat-label>
-                <input matInput type="text" formControlName="name" />
-                @if (getFieldError(editBookForm, "name")) {
-                  <mat-error>{{
-                    getFieldError(editBookForm, "name")
-                  }}</mat-error>
-                }
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Book description*</mat-label>
-                <input matInput type="text" formControlName="description" />
-                @if (getFieldError(editBookForm, "description")) {
-                  <mat-error>{{
-                    getFieldError(editBookForm, "description")
-                  }}</mat-error>
-                }
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Book Total Qty In Inventory*</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="inventory_total_qty"
-                />
-                @if (getFieldError(editBookForm, "inventory_total_qty")) {
-                  <mat-error>{{
-                    getFieldError(editBookForm, "inventory_total_qty")
-                  }}</mat-error>
-                }
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Genre</mat-label>
-                <mat-select formControlName="genre_id">
-                  @for (genre of genres(); track genre.id) {
-                    <mat-option [value]="genre.id">{{ genre.name }}</mat-option>
-                  }
-                </mat-select>
-                @if (getFieldError(editBookForm, "genre_id")) {
-                  <mat-error>{{
-                    getFieldError(editBookForm, "genre_id")
-                  }}</mat-error>
-                }
-              </mat-form-field>
-              <div class="form-group">
-                @if (editFileChangeDialogBtn()) {
-                  <div class="form-group">
-                    <label class="file-input-label">File Change</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onExistingBookPictureChange($event)"
-                      class="file-input"
-                    />
-                    @if (getFieldError(editBookForm, "file")) {
-                      <div class="file-input-error">
-                        {{ getFieldError(editBookForm, "file") }}
-                      </div>
-                    }
-                  </div>
-                  <button
-                    mat-button
-                    (click)="editFileChangeDialogBtn.set(false)"
-                  >
-                    Cancel File Change
-                  </button>
-                } @else {
-                  <button
-                    mat-button
-                    (click)="editFileChangeDialogBtn.set(true)"
-                  >
-                    Change File
-                  </button>
-                }
-              </div>
-              <small>*indicates required field</small>
-              @if (editBookErrorMessage()) {
-                <mat-card class="alert alert-danger">{{
-                  editBookErrorMessage()
-                }}</mat-card>
-              }
-            </form>
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-button (click)="editBookDialog.set(false)">
-              Close
-            </button>
-            <button
-              mat-raised-button
-              color="primary"
-              [disabled]="!editBookForm.valid || bookIsUpdating()"
-              (click)="updateBook()"
-            >
-              @if (bookIsUpdating()) {
-                <mat-spinner diameter="20"></mat-spinner>
-                <span>Updating...</span>
-              } @else {
-                <span>Save</span>
-              }
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-    </div>
-  }
 </div>

@@ -1,3 +1,21 @@
+@use "../../assets/styles/spacing" as spacing;
+
+.foods-container {
+  min-width: 0;
+}
+
+.foods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: spacing.$spacing-medium;
+}
+
 .example-card {
   background-color: purple;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  display: block;
 }

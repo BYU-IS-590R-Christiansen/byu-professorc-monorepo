@@ -1,9 +1,14 @@
 @use "../assets/styles/colors" as colors;
 @use "../assets/styles/spacing" as spacing;
 @use "../assets/styles/fonts" as fonts;
+@use "../assets/styles/breakpoints" as breakpoints;
 
 .app-container {
   min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
   background-color: colors.$colors-background;
   color: colors.$colors-text-primary;
   @include fonts.fonts-body;
@@ -13,22 +18,31 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  flex-shrink: 0;
+  gap: spacing.$spacing-small;
+  min-height: 56px;
   background-color: colors.$colors-primary !important;
   color: colors.$colors-white !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding-top: env(safe-area-inset-top);
+  padding-left: max(spacing.$spacing-small, env(safe-area-inset-left)) !important;
+  padding-right: max(spacing.$spacing-small, env(safe-area-inset-right)) !important;
 }
 
 .app-bar-spacer {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: spacing.$spacing-small;
 }
 
 .nav-buttons {
   display: flex;
-  gap: spacing.$spacing-small;
+  flex-shrink: 0;
+  gap: spacing.$spacing-extra-small;
 
   a {
     color: colors.$colors-white !important;
     text-decoration: none;
+    min-width: auto;
     padding: spacing.$spacing-extra-small spacing.$spacing-small;
     border-radius: spacing.$border-radius-extra-small;
     transition: background-color 0.2s;
@@ -72,7 +86,21 @@
 }
 
 .app-main {
-  padding: spacing.$spacing-large;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  padding: spacing.$spacing-medium;
+  padding-left: max(spacing.$spacing-medium, env(safe-area-inset-left));
+  padding-right: max(spacing.$spacing-medium, env(safe-area-inset-right));
+  padding-bottom: max(spacing.$spacing-medium, env(safe-area-inset-bottom));
+
+  @media (min-width: breakpoints.$breakpoint-md) {
+    padding: spacing.$spacing-medium-large;
+  }
+
+  @media (min-width: breakpoints.$breakpoint-lg) {
+    padding: spacing.$spacing-large;
+  }
 
   &--unauthenticated {
     padding: 0;
@@ -81,43 +109,82 @@
 
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 1000;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: spacing.$spacing-medium;
+  padding-top: max(spacing.$spacing-medium, env(safe-area-inset-top));
+  padding-bottom: max(spacing.$spacing-medium, env(safe-area-inset-bottom));
 }
 
 .modal-dialog {
   position: relative;
-  width: 90%;
-  max-width: 500px;
+  width: min(100%, 500px);
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
+  margin: auto;
   background-color: colors.$colors-surface;
   border-radius: spacing.$border-radius-medium;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .modal-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
+  overflow: hidden;
   background-color: colors.$colors-surface;
   border-radius: spacing.$border-radius-medium;
   color: colors.$colors-text-primary;
 }
 
 .modal-header {
+  flex-shrink: 0;
   padding: spacing.$spacing-medium;
   border-bottom: 1px solid colors.$colors-divider;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: spacing.$spacing-small;
 
-  h2 {
+  h2,
+  .modal-title {
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
     @include fonts.fonts-h3;
     color: colors.$colors-text-primary;
+  }
+}
+
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: spacing.$spacing-medium;
+}
+
+.modal-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: spacing.$spacing-small;
+  padding: spacing.$spacing-medium;
+  border-top: 1px solid colors.$colors-divider;
+
+  @media (max-width: breakpoints.$breakpoint-sm) {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
   }
 }
 
@@ -143,9 +210,9 @@
 }
 
 .avatar-icon-large {
-  font-size: 200px;
-  width: 200px;
-  height: 200px;
+  font-size: min(200px, 40vw);
+  width: min(200px, 40vw);
+  height: min(200px, 40vw);
   color: colors.$colors-medium-grey;
 }
 

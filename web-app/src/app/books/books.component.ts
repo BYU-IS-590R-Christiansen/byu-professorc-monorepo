@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, HostListener, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -14,7 +14,6 @@ import {
   clearFormErrors,
   getFieldError,
 } from '../core/utils/form.utils';
-import { isMobile } from '../core/utils/mobile.utils';
 import {
   apiErrorMessage,
   imageTooLargeMessage,
@@ -29,7 +28,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
@@ -49,7 +47,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatGridListModule,
     MatChipsModule,
     MatSlideToggleModule,
   ],
@@ -78,7 +75,7 @@ export class BooksComponent implements OnInit {
 
   createBookDialog = signal(false);
   deleteBookDialog = signal(false);
-  editBookDialog = signal(false);
+  flippedBookId = signal<number | null>(null);
   editFileChangeDialogBtn = signal(false);
 
   bookIsUpdating = signal(false);
@@ -91,7 +88,6 @@ export class BooksComponent implements OnInit {
   selectedEditFile = signal<File | null>(null);
   generatedBookImageUrl = signal<string | null>(null);
   generatedBookImagePath = signal<string | null>(null);
-  expandedAuthors = signal<Set<number>>(new Set());
 
   constructor() {
     this.newBookForm = this.fb.group({
@@ -170,7 +166,11 @@ export class BooksComponent implements OnInit {
     this.deleteBookDialog.set(true);
   }
 
-  openEditBookDialog(book: Book): void {
+  flipBook(book: Book): void {
+    if (this.flippedBookId() === book.id) {
+      return;
+    }
+
     this.editBook.set({ ...book });
     this.editBookForm.patchValue({
       name: book.name,
@@ -178,7 +178,37 @@ export class BooksComponent implements OnInit {
       inventory_total_qty: book.inventory_total_qty,
       genre_id: book.genre_id,
     });
-    this.editBookDialog.set(true);
+    this.editBookErrorMessage.set(null);
+    this.editFileChangeDialogBtn.set(false);
+    this.selectedEditFile.set(null);
+    this.flippedBookId.set(book.id);
+  }
+
+  closeFlippedBook(): void {
+    if (this.bookIsUpdating()) {
+      return;
+    }
+
+    this.flippedBookId.set(null);
+    this.editFileChangeDialogBtn.set(false);
+    this.selectedEditFile.set(null);
+    this.editBookErrorMessage.set(null);
+    this.editBook.set({});
+  }
+
+  isBookFlipped(bookId: number): boolean {
+    return this.flippedBookId() === bookId;
+  }
+
+  authorNames(book: Book): string {
+    if (!book.authors?.length) {
+      return '';
+    }
+
+    return book.authors
+      .map((author) => `${author.first_name} ${author.last_name}`.trim())
+      .filter((name) => name.length > 0)
+      .join(', ');
   }
 
   openCreateDialog(): void {
@@ -456,10 +486,8 @@ export class BooksComponent implements OnInit {
     this.booksService.updateBook(book).subscribe({
       next: (response) => {
         this.booksStore.setBook(response.results.book);
-        this.editBookDialog.set(false);
-        this.editFileChangeDialogBtn.set(false);
-        this.editBook.set({});
         this.bookIsUpdating.set(false);
+        this.closeFlippedBook();
       },
       error: (error) => {
         if (error?.error?.data && typeof error.error.data === 'object') {
@@ -487,6 +515,9 @@ export class BooksComponent implements OnInit {
     this.booksService.deleteBook(book).subscribe({
       next: () => {
         this.booksStore.removeBook(book);
+        if (this.flippedBookId() === book.id) {
+          this.flippedBookId.set(null);
+        }
         this.selectedDeleteBook.set(null);
         this.bookIsDeleting.set(false);
         this.deleteBookDialog.set(false);
@@ -536,21 +567,18 @@ export class BooksComponent implements OnInit {
     }
   }
 
-  isMobile = isMobile;
-
   getFieldError = getFieldError;
 
-  toggleAuthors(bookId: number): void {
-    const expanded = new Set(this.expandedAuthors());
-    if (expanded.has(bookId)) {
-      expanded.delete(bookId);
-    } else {
-      expanded.add(bookId);
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (
+      this.createBookDialog() ||
+      this.deleteBookDialog() ||
+      this.checkedOutBook()
+    ) {
+      return;
     }
-    this.expandedAuthors.set(expanded);
-  }
 
-  isAuthorsExpanded(bookId: number): boolean {
-    return this.expandedAuthors().has(bookId);
+    this.closeFlippedBook();
   }
 }

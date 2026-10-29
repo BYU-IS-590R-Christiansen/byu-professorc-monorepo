@@ -1,0 +1,17 @@
+@use "../../assets/styles/spacing" as spacing;
+@use "../../assets/styles/fonts" as fonts;
+
+.drinks-container {
+  width: 100%;
+  max-width: 480px;
+  min-width: 0;
+}
+
+h4 {
+  margin: 0 0 spacing.$spacing-medium;
+  @include fonts.fonts-h3;
+}
+
+.full-width {
+  width: 100%;
+}

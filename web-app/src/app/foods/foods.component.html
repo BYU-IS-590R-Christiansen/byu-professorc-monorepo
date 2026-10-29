@@ -1,27 +1,29 @@
-<p>
-  @for (food of foods(); track food) {
-    <mat-card
-      [ngClass]="{ 'example-card': food.isPurple }"
-      appearance="outlined"
-    >
-      <mat-card-header>
-        <div mat-card-avatar class="example-header-image"></div>
-        <mat-card-title>{{ food.name }}</mat-card-title>
-        <mat-card-subtitle>Dog Breed</mat-card-subtitle>
-      </mat-card-header>
-      <img
-        mat-card-image
-        role="img"
-        src="https://media.tenor.com/VWAZosGBC6AAAAAM/hellmo-pizza.gif"
-        alt="Photo of a  {{ food.name }}"
-      />
-      <mat-card-content>
-        <p>Description of {{ food.name }}</p>
-      </mat-card-content>
-      <mat-card-actions>
-        <button matButton>LIKE</button>
-        <button matButton>SHARE</button>
-      </mat-card-actions>
-    </mat-card>
-  }
-</p>
+<div class="foods-container">
+  <div class="foods-grid">
+    @for (food of foods(); track food.name) {
+      <mat-card
+        [ngClass]="{ 'example-card': food.isPurple }"
+        appearance="outlined"
+      >
+        <mat-card-header>
+          <div mat-card-avatar class="example-header-image"></div>
+          <mat-card-title>{{ food.name }}</mat-card-title>
+          <mat-card-subtitle>Dog Breed</mat-card-subtitle>
+        </mat-card-header>
+        <img
+          mat-card-image
+          role="img"
+          src="https://media.tenor.com/VWAZosGBC6AAAAAM/hellmo-pizza.gif"
+          alt="Photo of a  {{ food.name }}"
+        />
+        <mat-card-content>
+          <p>Description of {{ food.name }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button matButton>LIKE</button>
+          <button matButton>SHARE</button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</div>

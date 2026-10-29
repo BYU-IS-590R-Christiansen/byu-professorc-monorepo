@@ -1,13 +1,19 @@
 @use '../../../assets/styles/colors' as colors;
 @use '../../../assets/styles/spacing' as spacing;
 @use '../../../assets/styles/fonts' as fonts;
+@use '../../../assets/styles/breakpoints' as breakpoints;
 
 .login-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: spacing.$spacing-medium;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: max(spacing.$spacing-medium, env(safe-area-inset-top))
+    max(spacing.$spacing-medium, env(safe-area-inset-right))
+    max(spacing.$spacing-medium, env(safe-area-inset-bottom))
+    max(spacing.$spacing-medium, env(safe-area-inset-left));
   background:
     radial-gradient(
       circle at top left,
@@ -25,12 +31,17 @@
 .login-card {
   width: 100%;
   max-width: 420px;
-  padding: spacing.$spacing-medium-large spacing.$spacing-medium-large
-    spacing.$spacing-medium;
+  margin-block: auto;
+  padding: spacing.$spacing-medium;
   border-radius: spacing.$border-radius-medium;
   background-color: colors.$colors-surface;
   color: colors.$colors-text-primary;
   box-shadow: 0 16px 40px rgba(33, 33, 33, 0.12);
+
+  @media (min-width: breakpoints.$breakpoint-sm) {
+    padding: spacing.$spacing-medium-large spacing.$spacing-medium-large
+      spacing.$spacing-medium;
+  }
 }
 
 .login-brand {
@@ -151,33 +162,44 @@
   z-index: 1000;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  overflow-y: auto;
   padding: spacing.$spacing-medium;
+  padding-top: max(spacing.$spacing-medium, env(safe-area-inset-top));
+  padding-bottom: max(spacing.$spacing-medium, env(safe-area-inset-bottom));
 }
 
 .modal-dialog {
-  width: 100%;
-  max-width: 440px;
+  width: min(100%, 440px);
+  margin: auto;
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
 }
 
 .modal-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background-color: colors.$colors-surface;
   color: colors.$colors-text-primary;
   border-radius: spacing.$border-radius-medium;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
-  max-height: 90vh;
-  overflow: auto;
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
+  overflow: hidden;
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: spacing.$spacing-small;
+  flex-shrink: 0;
   padding: spacing.$spacing-medium spacing.$spacing-medium 0
-    spacing.$spacing-medium-large;
+    spacing.$spacing-medium;
 
   h2 {
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
     color: colors.$colors-text-primary;
     @include fonts.fonts-h3;
   }
@@ -194,10 +216,20 @@
   flex-direction: column;
 }
 
+.modal-content mat-card-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 mat-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: spacing.$spacing-small;
   padding: spacing.$spacing-small spacing.$spacing-medium
     spacing.$spacing-medium;
+  flex-shrink: 0;
 
   button {
     display: inline-flex;
@@ -207,5 +239,14 @@ mat-card-actions {
 
   mat-spinner {
     --mdc-circular-progress-active-indicator-color: #{colors.$colors-white};
+  }
+
+  @media (max-width: breakpoints.$breakpoint-sm) {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
   }
 }

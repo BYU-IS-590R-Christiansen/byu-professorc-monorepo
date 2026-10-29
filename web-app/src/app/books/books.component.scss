@@ -1,92 +1,235 @@
 @use "../../assets/styles/colors" as colors;
 @use "../../assets/styles/spacing" as spacing;
 @use "../../assets/styles/fonts" as fonts;
+@use "../../assets/styles/breakpoints" as breakpoints;
 
 .books-container {
-  padding: spacing.$spacing-large;
+  padding: 0;
+  min-width: 0;
 }
 
 .buttons-row {
   display: flex;
-  gap: spacing.$spacing-medium;
+  flex-wrap: wrap;
+  gap: spacing.$spacing-small;
   margin-bottom: spacing.$spacing-medium;
-}
 
-.book-card {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease-in-out;
-
-  &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-}
-.book-grid-tile {
-  padding: spacing.$spacing-small;
-  display: flex;
-  align-items: stretch;
-}
-
-mat-card-header {
-  flex-shrink: 0;
-  padding: spacing.$spacing-small spacing.$spacing-medium;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 60px;
-}
-
-mat-card-content {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: spacing.$spacing-small spacing.$spacing-medium
-    spacing.$spacing-extra-small;
-  min-height: 0;
-  max-height: 100%;
-  margin-bottom: 0;
-
-  &::-webkit-scrollbar {
-    width: 6px;
+  button {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
-  &::-webkit-scrollbar-track {
-    background: colors.$colors-light-grey;
-    border-radius: 3px;
-  }
+  @media (min-width: breakpoints.$breakpoint-sm) {
+    gap: spacing.$spacing-medium;
 
-  &::-webkit-scrollbar-thumb {
-    background: colors.$colors-medium-grey;
-    border-radius: 3px;
-
-    &:hover {
-      background: colors.$colors-dark-grey;
+    button {
+      flex: 0 0 auto;
     }
   }
 }
 
-mat-card-actions {
-  flex-shrink: 0;
-  padding: spacing.$spacing-extra-small spacing.$spacing-medium
-    spacing.$spacing-small;
+.books-subtitle {
+  @include fonts.fonts-body;
+  color: colors.$colors-text-secondary;
+  margin: 0 0 spacing.$spacing-medium-large;
+}
+
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  gap: spacing.$spacing-medium;
+  align-items: start;
+}
+
+.flip-card {
+  perspective: 1200px;
+}
+
+.flip-card.is-flipped {
+  grid-column: span 2;
+  z-index: 2;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  width: 100%;
+}
+
+.flip-card-front {
+  position: relative;
+  z-index: 2;
+}
+
+.flip-card-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card:not(.is-flipped) .flip-card-back {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.flip-card.is-flipped .flip-card-front {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.flip-card.is-flipped .flip-card-back {
+  position: relative;
+  inset: auto;
+  visibility: visible;
+}
+
+.book-card {
+  height: 100%;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition:
+    box-shadow 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
+}
+
+.flip-card:not(.is-flipped) .book-card:hover,
+.flip-card:not(.is-flipped) .book-cover-button:focus-visible {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+.flip-card:not(.is-flipped) .book-card:hover {
+  transform: translateY(-2px);
+}
+
+.book-cover-button {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.book-card-image {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background-color: colors.$colors-off-white;
   display: flex;
-  gap: spacing.$spacing-small;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+
+  &.checked-out-image {
+    opacity: 0.4;
+    filter: grayscale(50%);
+  }
+}
+
+.book-card-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: colors.$colors-medium-grey;
+  background-color: colors.$colors-light-grey;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.book-card-copy {
+  padding: spacing.$spacing-small spacing.$spacing-medium;
+}
+
+.book-card h3 {
+  @include fonts.fonts-h3;
+  color: colors.$colors-text-primary;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.book-authors,
+.book-stock {
+  @include fonts.fonts-caption;
+  color: colors.$colors-text-secondary;
+  margin: spacing.$spacing-extra-small 0 0;
+}
+
+.checked-out-label {
+  color: colors.$colors-error;
+  font-weight: fonts.$font-weight-semibold;
+  @include fonts.fonts-caption;
+  margin: spacing.$spacing-extra-small 0 0;
+}
+
+.book-card-actions,
+.book-card-edit mat-card-actions {
+  display: flex;
   flex-wrap: wrap;
-  margin-top: 0;
+  gap: spacing.$spacing-small;
+  align-items: center;
+  padding: 0 spacing.$spacing-medium spacing.$spacing-medium;
+
+  button {
+    min-width: 0;
+  }
 }
 
-.book-actions {
+.book-card-edit {
   display: flex;
-  gap: spacing.$spacing-extra-small;
-  flex-shrink: 0;
-  margin-left: auto;
+  flex-direction: column;
 }
 
-mat-card-title {
+.book-card-edit mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: spacing.$spacing-small spacing.$spacing-medium;
+}
+
+.book-card-edit mat-card-content {
+  padding: spacing.$spacing-small spacing.$spacing-medium;
+  overflow-y: auto;
+}
+
+.book-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  display: block;
+  margin: spacing.$spacing-small auto 0;
+  border-radius: spacing.$border-radius-small;
+}
+
+.book-card-edit mat-card-title {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -95,152 +238,76 @@ mat-card-title {
   @include fonts.fonts-h3;
 }
 
-.book-description {
-  margin-bottom: spacing.$spacing-small;
-  @include fonts.fonts-body;
-  color: colors.$colors-text-primary;
-  line-height: fonts.$line-height-normal;
-}
-
-.authors-section {
-  margin-bottom: spacing.$spacing-small;
-  @include fonts.fonts-caption;
-
-  .authors-toggle {
-    display: flex;
-    align-items: center;
-    gap: spacing.$spacing-extra-small;
-    padding: spacing.$spacing-extra-small spacing.$spacing-small;
-    min-width: auto;
-    width: 100%;
-    text-align: left;
-    color: colors.$colors-text-primary;
-    @include fonts.fonts-caption;
-    font-weight: fonts.$font-weight-medium;
-
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      transition: transform 0.2s;
-    }
-
-    strong {
-      font-weight: fonts.$font-weight-medium;
-      color: colors.$colors-text-primary;
-    }
-
-    &:hover {
-      background-color: colors.$colors-light-grey;
-    }
+@media (max-width: breakpoints.$breakpoint-md) {
+  .flip-card.is-flipped {
+    grid-column: 1 / -1;
   }
-
-  .authors-list {
-    list-style: none;
-    padding-left: spacing.$spacing-medium;
-    margin-top: spacing.$spacing-extra-small;
-    margin-bottom: 0;
-    animation: slideDown 0.2s ease-out;
-  }
-
-  li {
-    margin-bottom: spacing.$spacing-extra-small;
-    color: colors.$colors-text-secondary;
-    @include fonts.fonts-caption;
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
-}
-
-.phones {
-  margin-left: spacing.$spacing-small;
-  font-size: fonts.$font-size-xs;
-  color: colors.$colors-text-secondary;
-  margin-top: spacing.$spacing-extra-small;
-}
-
-.book-image-container {
-  text-align: center;
-  margin: spacing.$spacing-small 0;
-  flex-shrink: 0;
-}
-
-.book-image {
-  max-width: 100%;
-  height: auto;
-  max-height: 300px;
-  width: auto;
-  object-fit: contain;
-  border-radius: spacing.$border-radius-small;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: block;
-  margin: 0 auto;
-
-  &.checked-out-image {
-    opacity: 0.4;
-    filter: grayscale(50%);
-  }
-}
-
-.checked-out-label {
-  color: colors.$colors-error;
-  font-weight: fonts.$font-weight-semibold;
-  @include fonts.fonts-caption;
-  text-align: center;
-  margin: spacing.$spacing-small 0 0 0;
-}
-
-mat-card-content h3 {
-  @include fonts.fonts-caption;
-  color: colors.$colors-text-primary;
-  text-align: center;
-  margin: spacing.$spacing-small 0 0 0;
-  font-weight: fonts.$font-weight-medium;
 }
 
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 1000;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: spacing.$spacing-medium;
+  padding-top: max(spacing.$spacing-medium, env(safe-area-inset-top));
+  padding-bottom: max(spacing.$spacing-medium, env(safe-area-inset-bottom));
 }
 
 .modal-dialog {
   position: relative;
-  width: 90%;
-  max-width: 500px;
+  width: min(100%, 500px);
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
+  display: flex;
+  flex-direction: column;
+  margin: auto;
 
   &.modal-lg {
-    max-width: 1024px;
+    width: min(100%, 1024px);
   }
 }
 
 .modal-content {
+  width: 100%;
   background-color: colors.$colors-surface;
   color: colors.$colors-text-primary;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-  max-height: 90vh; // ensure popover/dialog content stays on-screen
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.modal-content mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: spacing.$spacing-small;
+  flex-shrink: 0;
+}
+
+.modal-content mat-card-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.modal-content mat-card-actions {
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .modal-content mat-card-content {
   flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .alert {
@@ -284,6 +351,7 @@ mat-card-content h3 {
 
 .file-input {
   width: 100%;
+  max-width: 100%;
   padding: spacing.$spacing-small spacing.$spacing-medium;
   border: 1px solid colors.$colors-border;
   border-radius: spacing.$border-radius-small;
@@ -326,7 +394,7 @@ mat-card-content h3 {
   .mat-mdc-card {
     background-color: colors.$colors-surface !important;
     color: colors.$colors-text-primary !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .mat-mdc-card-title,

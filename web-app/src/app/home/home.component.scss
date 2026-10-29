@@ -3,7 +3,8 @@
 @use '../../assets/styles/fonts' as fonts;
 
 .home-container {
-  padding: spacing.$spacing-large;
+  padding: 0;
+  min-width: 0;
 }
 
 h2 {
@@ -38,7 +39,7 @@ p {
 
 .book-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
   gap: spacing.$spacing-medium;
 }
 
@@ -117,6 +118,7 @@ p {
   @include fonts.fonts-h3;
   color: colors.$colors-text-primary;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .book-authors {
@@ -140,19 +142,24 @@ p {
   z-index: 1000;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  overflow-y: auto;
   padding: spacing.$spacing-medium;
+  padding-top: max(spacing.$spacing-medium, env(safe-area-inset-top));
+  padding-bottom: max(spacing.$spacing-medium, env(safe-area-inset-bottom));
 }
 
 .modal-dialog {
   width: min(720px, 100%);
+  margin: auto;
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
 }
 
 .enlarged-card {
   background-color: colors.$colors-surface;
   color: colors.$colors-text-primary;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  max-height: 90vh;
+  max-height: calc(100dvh - #{spacing.$spacing-medium} * 2);
   overflow: auto;
 }
 
@@ -160,18 +167,24 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: spacing.$spacing-small;
   padding: spacing.$spacing-medium;
+}
+
+.enlarged-card mat-card-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .enlarged-image {
   border-radius: spacing.$border-radius-small;
   overflow: hidden;
-  max-height: 62vh;
+  max-height: 62dvh;
 }
 
 .enlarged-image img {
   object-fit: contain;
-  max-height: 62vh;
+  max-height: 62dvh;
 }
 
 ::ng-deep {
