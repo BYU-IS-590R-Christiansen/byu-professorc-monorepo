@@ -139,53 +139,60 @@ test.describe("Deployment Verification", () => {
 		expect(corsHeader).toBeTruthy();
 	});
 
-	test("Backend API login should succeed with seeded test user credentials", async ({
-		request,
-	}: {
-		request: APIRequestContext;
-	}) => {
-		if (!SEED_USER_EMAIL || !SEED_USER_PASSWORD) {
-			throw new Error(
-				"SEED_USER_EMAIL and SEED_USER_PASSWORD must be set (backend/.env locally, GitHub secrets in CI).",
-			);
-		}
-
-		const response = await request.post(`${BACKEND_URL}/api/login`, {
-			data: {
-				email: SEED_USER_EMAIL,
-				password: SEED_USER_PASSWORD,
-			},
+	test.describe("seeded admin login", () => {
+		// Do not record trace/video/screenshot: the login POST body includes the secret password.
+		test.use({
+			trace: "off",
+			video: "off",
+			screenshot: "off",
 		});
 
-		// Should succeed with valid credentials
-		const text = await response.text();
-		const contentType = response.headers()["content-type"] || "";
-		if (!response.ok()) {
-			throw new Error(
-				`Login failed (status ${response.status()}). Content-Type: ${contentType}. Body: ${text.slice(0, 300)}`,
-			);
-		}
-		expect(response.ok()).toBeTruthy();
-		expect(response.status()).toBe(200);
+		test("Backend API login should succeed with seeded test user credentials", async () => {
+			if (!SEED_USER_EMAIL || !SEED_USER_PASSWORD) {
+				throw new Error(
+					"SEED_USER_EMAIL and SEED_USER_PASSWORD must be set (backend/.env locally, GitHub secrets in CI).",
+				);
+			}
 
-		// Should return JSON response with success data
-		if (!contentType.includes("application/json")) {
-			throw new Error(
-				`Login returned non-JSON. Body starts with: ${text.slice(0, 200)}`,
-			);
-		}
-		const body = JSON.parse(text);
-		expect(body).toBeTruthy();
+			// Native fetch so Playwright never captures the password in request logs.
+			const response = await fetch(`${BACKEND_URL}/api/login`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+				body: JSON.stringify({
+					email: SEED_USER_EMAIL,
+					password: SEED_USER_PASSWORD,
+				}),
+			});
 
-		// Verify successful login response structure
-		expect(body.success).toBe(true);
-		expect(body.results).toBeTruthy();
-		expect(body.results.token).toBeTruthy();
-		expect(body.results.name).toBe(SEED_USER_NAME);
-		expect(body.message).toContain("login successfully");
+			const text = await response.text();
+			const contentType = response.headers.get("content-type") || "";
+			if (!response.ok) {
+				throw new Error(
+					`Login failed (status ${response.status}). Content-Type: ${contentType}. Body: ${text.slice(0, 300)}`,
+				);
+			}
+			expect(response.ok).toBeTruthy();
+			expect(response.status).toBe(200);
 
-		// Verify CORS headers are present
-		const corsHeader = response.headers()["access-control-allow-origin"];
-		expect(corsHeader).toBeTruthy();
+			if (!contentType.includes("application/json")) {
+				throw new Error(
+					`Login returned non-JSON. Body starts with: ${text.slice(0, 200)}`,
+				);
+			}
+			const body = JSON.parse(text);
+			expect(body).toBeTruthy();
+
+			expect(body.success).toBe(true);
+			expect(body.results).toBeTruthy();
+			expect(body.results.token).toBeTruthy();
+			expect(body.results.name).toBe(SEED_USER_NAME);
+			expect(body.message).toContain("login successfully");
+
+			const corsHeader = response.headers.get("access-control-allow-origin");
+			expect(corsHeader).toBeTruthy();
+		});
 	});
 });
