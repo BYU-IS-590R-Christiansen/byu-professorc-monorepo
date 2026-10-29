@@ -6,16 +6,17 @@ This Terraform configuration replicates the functionality of `devops/bash/setup-
 
 - **Security Group**: `byu-590r-sg` with ingress rules for:
   - SSH (port 22)
-  - HTTP (port 80)
-  - HTTPS (port 443)
-  - Backend API (port 4444)
+  - HTTP (port 80) — Caddy
+  - HTTPS (port 443) — Caddy / Let's Encrypt
+  - Backend API (port 4444) — Apache (legacy HTTP)
 
 - **EC2 Instance**: `t2.micro` instance with:
   - Node.js 18
   - PHP 8.3.36 with required extensions
   - Composer
   - MySQL
-  - Apache with virtual hosts configured
+  - Apache (Angular on `:8080`, Laravel on `:4444`)
+  - Caddy reverse proxy on `:80`/`:443` with automatic HTTPS at `<eip>.sslip.io` (no DNS)
   - Application directories created
   - Database and user configured
 
@@ -174,9 +175,19 @@ Other outputs:
 - `ec2_host`: EC2 host (same as `EC2_HOST` above)
 - `s3_bucket_dev`: Dev S3 bucket name
 - `s3_bucket_prod`: Prod S3 bucket name
-- `frontend_url`: Frontend URL
-- `backend_api_url`: Backend API URL
+- `frontend_url`: Frontend HTTPS URL (`https://<eip>.sslip.io`)
+- `backend_api_url`: Backend HTTPS URL (`https://<eip>.sslip.io/api/hello`)
+- `frontend_url_http` / `backend_api_url_direct`: legacy HTTP
 - `summary`: Full summary and next steps
+
+### Caddy HTTPS
+
+Caddy sits in front of Apache, matching CS 260 (`reverse_proxy`) and using `<elastic-ip>.sslip.io` so Let's Encrypt works with no DNS (same trick as neuronova).
+
+- Public: `https://<eip>.sslip.io/` (Angular) and `https://<eip>.sslip.io/api/` (Laravel)
+- Apache stays on loopback `:8080` (frontend) and `:4444` (API, still reachable as `http://<eip>:4444` for existing clients)
+- `user_data` installs Caddy on **new** instances. Existing boxes: `PUBLIC_IP=<eip> sudo bash terraform/scripts/configure-caddy.sh` (GitHub Actions also runs this on deploy)
+- Instance `user_data` is ignored after create so a Caddy tweak does not replace the EC2 box
 
 ### Optional: update GitHub Actions secrets from Terraform
 

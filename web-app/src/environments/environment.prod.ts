@@ -1,5 +1,5 @@
-// apiUrl host is replaced at deploy time from GitHub Actions secret EC2_HOST (Terraform output)
+// Same-origin /api/ so HTTPS via Caddy (https://<eip>.sslip.io) is not mixed content.
 export const environment = {
   production: true,
-  apiUrl: 'http://__EC2_HOST__:4444/api/',
+  apiUrl: '/api/',
 };

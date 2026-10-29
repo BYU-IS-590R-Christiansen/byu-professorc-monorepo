@@ -31,7 +31,7 @@ chmod +x setup-ec2-server.sh
    ```typescript
    export const environment = {
    	production: true,
-   	apiUrl: "http://YOUR_NEW_EC2_IP:4444/api/",
+   apiUrl: "/api/",
    };
    ```
 3. Commit and push the change - the frontend will be rebuilt and redeployed automatically
@@ -172,14 +172,15 @@ This is required because the production Angular app makes direct API calls (no p
 
 Push to `main` branch - GitHub Actions will auto-deploy.
 
-**Note**: If you've updated the EC2 IP in `environment.prod.ts`, make sure to commit and push that change so the frontend is rebuilt with the correct API URL.
+Production Angular uses same-origin `/api/` behind Caddy (`https://YOUR_EC2_IP.sslip.io`).
 
 ### 4. Verify Deployment
 
-- **Frontend**: `http://YOUR_EC2_IP`
-- **Backend API**: `http://YOUR_EC2_IP:4444/api/hello`
-- **Health Check**: `http://YOUR_EC2_IP:4444/api/health`
-- **S3 Test**: `http://YOUR_EC2_IP:4444/api/test-s3`
+- **Frontend**: `https://YOUR_EC2_IP.sslip.io`
+- **Backend API**: `https://YOUR_EC2_IP.sslip.io/api/hello`
+- **Health Check**: `https://YOUR_EC2_IP.sslip.io/api/health`
+- **S3 Test**: `https://YOUR_EC2_IP.sslip.io/api/test-s3`
+- **Legacy HTTP API**: `http://YOUR_EC2_IP:4444/api/hello`
 
 ### 5. Cleanup
 

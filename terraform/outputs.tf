@@ -6,9 +6,9 @@
 output "github_actions_secrets" {
   description = "Secret names and values for GitHub Actions (Settings → Secrets and variables → Actions)"
   value = {
-    EC2_HOST       = aws_eip.byu_590r_eip.public_ip
-    S3_BUCKET      = aws_s3_bucket.prod.id   # Production bucket for deployments
-    S3_BUCKET_DEV = aws_s3_bucket.dev.id    # Dev bucket (e.g. for local .env)
+    EC2_HOST      = aws_eip.byu_590r_eip.public_ip
+    S3_BUCKET     = aws_s3_bucket.prod.id # Production bucket for deployments
+    S3_BUCKET_DEV = aws_s3_bucket.dev.id  # Dev bucket (e.g. for local .env)
     INSTANCE_ID   = aws_instance.byu_590r_server.id
   }
 }
@@ -70,18 +70,28 @@ output "s3_bucket" {
 }
 
 output "frontend_url" {
-  description = "Frontend URL"
+  description = "Frontend URL (Caddy HTTPS via sslip.io)"
+  value       = "https://${aws_eip.byu_590r_eip.public_ip}.sslip.io"
+}
+
+output "frontend_url_http" {
+  description = "Frontend URL over HTTP on the Elastic IP (Caddy :80)"
   value       = "http://${aws_eip.byu_590r_eip.public_ip}"
 }
 
 output "backend_api_url" {
-  description = "Backend API URL"
+  description = "Backend API URL (Caddy HTTPS via sslip.io)"
+  value       = "https://${aws_eip.byu_590r_eip.public_ip}.sslip.io/api/hello"
+}
+
+output "backend_api_url_direct" {
+  description = "Backend API URL on Apache :4444 (legacy HTTP)"
   value       = "http://${aws_eip.byu_590r_eip.public_ip}:4444/api/hello"
 }
 
 output "summary" {
   description = "Summary of created resources"
-  value = <<-EOT
+  value       = <<-EOT
     ╔══════════════════════════════════════════════════════════════════════════════╗
     ║                                                                              ║
     ║                    🚀 INFRASTRUCTURE SETUP COMPLETE 🚀                    ║
@@ -130,8 +140,9 @@ output "summary" {
       8. Once secrets are updated, push changes to main branch to trigger deployment
       
       🚀 Your application will be available at:
-         Frontend: http://${aws_eip.byu_590r_eip.public_ip}
-         Backend API: http://${aws_eip.byu_590r_eip.public_ip}:4444/api/hello
+         Frontend (HTTPS): https://${aws_eip.byu_590r_eip.public_ip}.sslip.io
+         Backend API (HTTPS): https://${aws_eip.byu_590r_eip.public_ip}.sslip.io/api/hello
+         Legacy HTTP API: http://${aws_eip.byu_590r_eip.public_ip}:4444/api/hello
       
       📝 Generated Values Summary:
          EC2_HOST: ${aws_eip.byu_590r_eip.public_ip}

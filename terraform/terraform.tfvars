@@ -2,13 +2,13 @@
 # This file contains non-sensitive infrastructure configuration and is committed to the repository
 
 # AWS Configuration
-aws_region  = "us-west-1"
-aws_profile = "default" # class account 728053034151 (user/byu), not neuronova
-key_name    = "byu-590r"
+aws_region   = "us-west-1"
+aws_profile  = "default" # class account 728053034151 (user/byu), not neuronova
+key_name     = "byu-590r"
 project_name = "byu-590r"
 
 # Environment
-environment = "production"  # Can be 'development', 'local', or 'production'
+environment = "production" # Can be 'development', 'local', or 'production'
 
 # EC2 Configuration
 instance_type = "t2.micro"

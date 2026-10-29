@@ -161,7 +161,7 @@ sudo tee /etc/apache2/sites-available/byu-590r-backend.conf > /dev/null << 'APAC
 APACHE_BACKEND_EOF
 
 sudo tee /etc/apache2/sites-available/byu-590r-frontend.conf > /dev/null << 'APACHE_FRONTEND_EOF'
-<VirtualHost *:80>
+<VirtualHost *:8080>
     ServerName localhost
     DocumentRoot /var/www/html/app/browser
     
@@ -190,8 +190,10 @@ sudo a2ensite byu-590r-backend.conf
 sudo a2ensite byu-590r-frontend.conf
 sudo a2dissite 000-default
 
-# Add ports to Apache configuration
+# Add ports to Apache configuration (Caddy owns :80/:443)
+echo "Listen 127.0.0.1:8080" | sudo tee -a /etc/apache2/ports.conf
 echo "Listen 4444" | sudo tee -a /etc/apache2/ports.conf
+sudo sed -i 's/^Listen 80$/# Listen 80  # Caddy owns :80/' /etc/apache2/ports.conf
 
 sudo systemctl reload apache2
 
@@ -237,12 +239,19 @@ if [ ! -f /var/www/html/api/.env ]; then
     fi
 fi
 
-# Ensure Apache is running and enabled (fix connection refused on port 80)
+# Ensure Apache is running (frontend :8080, API :4444). Caddy binds :80/:443.
 sudo systemctl enable apache2
 sudo systemctl start apache2 || sudo systemctl restart apache2
 sleep 2
 sudo systemctl status apache2 --no-pager || true
-echo "[SUCCESS] Apache enabled and started - port 80 ready"
+echo "[SUCCESS] Apache enabled and started"
+
+# Caddy: automatic HTTPS reverse_proxy (CS 260 / neuronova pattern)
+sudo tee /usr/local/sbin/byu-590r-configure-caddy.sh > /dev/null << 'CADDY_SETUP'
+${file("${path.module}/scripts/configure-caddy.sh")}
+CADDY_SETUP
+sudo chmod +x /usr/local/sbin/byu-590r-configure-caddy.sh
+sudo /usr/local/sbin/byu-590r-configure-caddy.sh || echo "[WARN] Caddy setup deferred until EIP/deploy"
 
 echo "Server setup complete! Ready for GitHub Actions deployment."
 EOF
@@ -263,6 +272,9 @@ resource "aws_instance" "byu_590r_server" {
 
   lifecycle {
     create_before_destroy = true
+    # Existing boxes are configured by terraform/scripts/configure-caddy.sh
+    # (CI and manual SSH). Do not replace the instance when user_data changes.
+    ignore_changes = [user_data]
   }
 }
 
@@ -288,7 +300,7 @@ resource "aws_eip_association" "byu_590r_eip_assoc" {
 
 # Random ID for prod bucket suffix (equivalent to openssl rand -hex 4)
 resource "random_id" "prod_bucket_suffix" {
-  byte_length = 2  # 2 bytes = 4 hex characters
+  byte_length = 2 # 2 bytes = 4 hex characters
 }
 
 # Stable bucket names. Do not use timestamp() — that forced a replace on every apply.
@@ -352,9 +364,9 @@ resource "aws_s3_bucket_public_access_block" "prod" {
 # Uses placeholder.jpg for any key whose file is missing so production always has all seeded image keys.
 # path.module/.. is repo root when this module lives at <repo>/terraform
 locals {
-  book_images_dir       = abspath("${path.module}/../${var.book_images_path}")
-  book_image_keys       = toset(var.book_images)
-  placeholder_path      = "${local.book_images_dir}/placeholder.jpg"
+  book_images_dir  = abspath("${path.module}/../${var.book_images_path}")
+  book_image_keys  = toset(var.book_images)
+  placeholder_path = "${local.book_images_dir}/placeholder.jpg"
   # For each key: use the real file if present, else the committed placeholder image
   book_image_source = {
     for f in local.book_image_keys : f =>

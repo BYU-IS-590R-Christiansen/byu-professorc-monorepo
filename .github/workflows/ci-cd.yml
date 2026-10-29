@@ -182,6 +182,7 @@ jobs:
             (grep -q '^DB_DATABASE=' .env && sed -i 's/^DB_DATABASE=.*/DB_DATABASE=${{ secrets.DB_DATABASE }}/' .env || echo 'DB_DATABASE=${{ secrets.DB_DATABASE }}' >> .env); \
             (grep -q '^DB_USERNAME=' .env && sed -i 's/^DB_USERNAME=.*/DB_USERNAME=${{ secrets.DB_USERNAME }}/' .env || echo 'DB_USERNAME=${{ secrets.DB_USERNAME }}' >> .env); \
             (grep -q '^DB_PASSWORD=' .env && sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env || echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env); \
+            (grep -q '^APP_URL=' .env && sed -i 's|^APP_URL=.*|APP_URL=https://${{ secrets.EC2_HOST }}.sslip.io|' .env || echo 'APP_URL=https://${{ secrets.EC2_HOST }}.sslip.io' >> .env); \
             (grep -q '^FILESYSTEM_DISK=' .env && sed -i 's/^FILESYSTEM_DISK=.*/FILESYSTEM_DISK=s3/' .env || echo 'FILESYSTEM_DISK=s3' >> .env); \
             (grep -q '^S3_BUCKET=' .env && sed -i 's|^S3_BUCKET=.*|S3_BUCKET=${{ secrets.S3_BUCKET }}|' .env || echo 'S3_BUCKET=${{ secrets.S3_BUCKET }}' >> .env); \
             (grep -q '^S3_BUCKET_PROD=' .env && sed -i 's|^S3_BUCKET_PROD=.*|S3_BUCKET_PROD=${{ secrets.S3_BUCKET }}|' .env || echo 'S3_BUCKET_PROD=${{ secrets.S3_BUCKET }}' >> .env); \
@@ -232,8 +233,6 @@ jobs:
 
       - name: Deploy frontend
         run: |
-          # Inject Terraform-generated EC2 host into production environment (from GitHub secret EC2_HOST)
-          sed -i "s|__EC2_HOST__|${{ secrets.EC2_HOST }}|g" web-app/src/environments/environment.prod.ts
           cd web-app
           npm install
           npm run build
@@ -243,10 +242,16 @@ jobs:
             dist/byu-590r-builder/ ubuntu@${{ secrets.EC2_HOST }}:/var/www/html/app/
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "sudo chown -R www-data:www-data /var/www/html/app && sudo systemctl reload apache2"
 
+      - name: Configure Caddy HTTPS
+        run: |
+          scp -o StrictHostKeyChecking=no terraform/scripts/configure-caddy.sh ubuntu@${{ secrets.EC2_HOST }}:/tmp/configure-caddy.sh
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "sudo cp /tmp/configure-caddy.sh /usr/local/sbin/byu-590r-configure-caddy.sh && sudo chmod +x /usr/local/sbin/byu-590r-configure-caddy.sh && sudo PUBLIC_IP=${{ secrets.EC2_HOST }} /usr/local/sbin/byu-590r-configure-caddy.sh"
+
       - name: Verify
         run: |
           sleep 5
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "curl -s -o /dev/null -w '%{http_code}' http://localhost/ && echo ' Frontend' && curl -s -o /dev/null -w '%{http_code}' http://localhost:4444/api/hello && echo ' Backend'"
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/ && echo ' Frontend (Apache)' && curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4444/api/hello && echo ' Backend' && curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/ && echo ' Caddy HTTP'"
+          curl -sS -o /dev/null -w '%{http_code}' --retry 8 --retry-delay 3 --retry-all-errors "https://${{ secrets.EC2_HOST }}.sslip.io/api/hello" && echo ' Caddy HTTPS API'
 
   test-deployment:
     name: Post-deploy tests
@@ -262,7 +267,7 @@ jobs:
       - name: Run Playwright
         env:
           BACKEND_URL: http://${{ secrets.EC2_HOST }}:4444
-          FRONTEND_URL: http://${{ secrets.EC2_HOST }}
+          FRONTEND_URL: https://${{ secrets.EC2_HOST }}.sslip.io
         run: npx playwright test --reporter=list,html
       - uses: actions/upload-artifact@v4
         if: always()
@@ -278,5 +283,5 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - run: |
-          echo "Frontend http://${{ secrets.EC2_HOST }}"
-          echo "Backend  http://${{ secrets.EC2_HOST }}:4444/api/hello"
+          echo "Frontend https://${{ secrets.EC2_HOST }}.sslip.io"
+          echo "Backend  https://${{ secrets.EC2_HOST }}.sslip.io/api/hello"
