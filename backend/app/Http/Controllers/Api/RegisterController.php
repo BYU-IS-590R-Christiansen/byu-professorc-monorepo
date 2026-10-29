@@ -46,7 +46,7 @@ class RegisterController extends BaseController
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->getAuthPassword())) {
-            return $this->sendError('Unauthorised.', ['error' => 'Unauthorised']);
+            return $this->sendError('Unauthorized.', ['error' => 'Unauthorized']);
         }
 
         /** @var \App\Models\User $user */

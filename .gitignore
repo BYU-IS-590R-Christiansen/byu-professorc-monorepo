@@ -4,6 +4,11 @@
 devops/.server-config
 devops/.aws-config
 
+# Dependencies and test artifacts
+node_modules/
+test-results/
+playwright-report/
+
 # IDE and editor files
 .vscode/
 .idea/

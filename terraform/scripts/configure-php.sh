@@ -52,6 +52,10 @@ write_ini() {
 ; CVE-2026-109619, CVE-2026-115560
 session.upload_progress.enabled=0
 fatal_error_backtraces=0
+; Match nginx client_max_body_size. Default 2M makes Laravel report
+; "The image failed to upload." for iPhone / simulator photos.
+upload_max_filesize=20M
+post_max_size=20M
 INI
 }
 

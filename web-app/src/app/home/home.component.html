@@ -1,13 +1,92 @@
 <div class="home-container">
-  <h2>Here are your favorite books:</h2>
-  <mat-card>
-    <mat-card-content>
-      <mat-list>
-        @for (book of listOfBooks; track book) {
-          <mat-list-item>{{ book }}</mat-list-item>
-        }
-      </mat-list>
-    </mat-card-content>
-  </mat-card>
+  <h2>Your books</h2>
+  <p class="home-subtitle">Click a cover to open a larger card.</p>
+
+  @if (isLoading()) {
+    <div class="home-status">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Loading your books...</span>
+    </div>
+  } @else if (loadError()) {
+    <mat-card class="home-status-card">
+      <mat-card-content>
+        <p>{{ loadError() }}</p>
+        <button mat-raised-button color="primary" (click)="loadBooks()">
+          Try again
+        </button>
+      </mat-card-content>
+    </mat-card>
+  } @else if (books().length === 0) {
+    <mat-card class="home-status-card">
+      <mat-card-content>
+        <p>You do not have any books yet.</p>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="book-list" role="list">
+      @for (book of books(); track book.id) {
+        <button
+          type="button"
+          class="book-list-item"
+          role="listitem"
+          (click)="openBook(book)"
+        >
+          <mat-card class="book-card">
+            <div class="book-card-image">
+              @if (book.file) {
+                <img [src]="book.file" [alt]="book.name" />
+              } @else {
+                <div class="book-card-placeholder">
+                  <mat-icon>menu_book</mat-icon>
+                </div>
+              }
+            </div>
+            <mat-card-content>
+              <h3>{{ book.name }}</h3>
+              @if (authorNames(book)) {
+                <p class="book-authors">{{ authorNames(book) }}</p>
+              }
+            </mat-card-content>
+          </mat-card>
+        </button>
+      }
+    </div>
+  }
 </div>
 
+@if (selectedBook(); as book) {
+  <div class="modal" (click)="closeBook()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <mat-card class="enlarged-card">
+        <mat-card-header>
+          <mat-card-title>{{ book.name }}</mat-card-title>
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Close book preview"
+            (click)="closeBook()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="enlarged-image">
+            @if (book.file) {
+              <img [src]="book.file" [alt]="book.name" />
+            } @else {
+              <div class="book-card-placeholder book-card-placeholder--large">
+                <mat-icon>menu_book</mat-icon>
+              </div>
+            }
+          </div>
+          @if (authorNames(book)) {
+            <p class="book-authors">{{ authorNames(book) }}</p>
+          }
+          @if (book.description) {
+            <p class="book-description">{{ book.description }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+}

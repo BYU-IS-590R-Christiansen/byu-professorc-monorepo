@@ -58,11 +58,14 @@ test.describe("Deployment Verification", () => {
 		const loginButton = page.getByRole("button", { name: "Sign in" });
 		await expect(loginButton).toBeVisible({ timeout: 10000 });
 
-		// Verify login form elements are present
-		const emailInput = page.getByLabel("Email");
+		// Use textbox roles so the "Show password" toggle is not matched
+		const emailInput = page.getByRole("textbox", { name: "Email", exact: true });
 		await expect(emailInput).toBeVisible();
 
-		const passwordInput = page.getByLabel("Password");
+		const passwordInput = page.getByRole("textbox", {
+			name: "Password",
+			exact: true,
+		});
 		await expect(passwordInput).toBeVisible();
 
 		// Take a screenshot for verification

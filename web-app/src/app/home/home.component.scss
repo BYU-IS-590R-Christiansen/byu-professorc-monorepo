@@ -4,29 +4,184 @@
 
 .home-container {
   padding: spacing.$spacing-large;
-  
-  h2 {
-    @include fonts.fonts-h2;
-    color: colors.$colors-text-primary;
-    margin-bottom: spacing.$spacing-medium;
+}
+
+h2 {
+  @include fonts.fonts-h2;
+  color: colors.$colors-text-primary;
+  margin-bottom: spacing.$spacing-small;
+}
+
+.home-subtitle,
+p {
+  @include fonts.fonts-body;
+  color: colors.$colors-text-secondary;
+  margin-bottom: spacing.$spacing-medium-large;
+}
+
+.home-status,
+.home-status-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: spacing.$spacing-medium;
+  color: colors.$colors-text-secondary;
+}
+
+.home-status-card mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: spacing.$spacing-medium;
+  text-align: center;
+}
+
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: spacing.$spacing-medium;
+}
+
+.book-list-item {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: spacing.$border-radius-small;
+}
+
+.book-card {
+  height: 100%;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.book-list-item:hover .book-card,
+.book-list-item:focus-visible .book-card {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  transform: translateY(-2px);
+}
+
+.book-card-image,
+.enlarged-image {
+  background-color: colors.$colors-off-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-card-image {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.book-card-image img,
+.enlarged-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.book-card-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: colors.$colors-medium-grey;
+  background-color: colors.$colors-light-grey;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
   }
 
-  p {
-    @include fonts.fonts-body;
-    color: colors.$colors-text-primary;
+  &--large {
+    min-height: 360px;
+
+    mat-icon {
+      font-size: 72px;
+      width: 72px;
+      height: 72px;
+    }
   }
+}
+
+.book-card h3 {
+  @include fonts.fonts-h3;
+  color: colors.$colors-text-primary;
+  margin: 0;
+}
+
+.book-authors {
+  @include fonts.fonts-caption;
+  color: colors.$colors-text-secondary;
+  margin: spacing.$spacing-extra-small 0 0;
+}
+
+.book-description {
+  @include fonts.fonts-body;
+  color: colors.$colors-text-primary;
+  margin: spacing.$spacing-small 0 0;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: spacing.$spacing-medium;
+}
+
+.modal-dialog {
+  width: min(720px, 100%);
+}
+
+.enlarged-card {
+  background-color: colors.$colors-surface;
+  color: colors.$colors-text-primary;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.enlarged-card mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: spacing.$spacing-medium;
+}
+
+.enlarged-image {
+  border-radius: spacing.$border-radius-small;
+  overflow: hidden;
+  max-height: 62vh;
+}
+
+.enlarged-image img {
+  object-fit: contain;
+  max-height: 62vh;
 }
 
 ::ng-deep {
   .mat-mdc-card {
     background-color: colors.$colors-surface !important;
     color: colors.$colors-text-primary !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
   }
-  
-  .mat-mdc-list-item {
+
+  .mat-mdc-card-title {
     color: colors.$colors-text-primary !important;
-    @include fonts.fonts-body;
+    @include fonts.fonts-h3;
   }
 }
-
