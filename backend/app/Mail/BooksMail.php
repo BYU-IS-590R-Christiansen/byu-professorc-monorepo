@@ -38,7 +38,7 @@ class BooksMail extends Mailable
             with: [
                 'books' => $this->books,
                 'appName' => config('mail.from.name', 'BYU'),
-                'appUrl' => rtrim((string) config('app.url'), '/'),
+                'appUrl' => rtrim((string) config('app.frontend_url', 'https://professorccs260.click'), '/') . '/books',
                 'generatedAt' => $generatedAt,
                 'titleCount' => $this->books->count(),
             ]

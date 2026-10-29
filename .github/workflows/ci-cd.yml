@@ -185,6 +185,7 @@ jobs:
             (grep -q '^DB_USERNAME=' .env && sed -i 's/^DB_USERNAME=.*/DB_USERNAME=${{ secrets.DB_USERNAME }}/' .env || echo 'DB_USERNAME=${{ secrets.DB_USERNAME }}' >> .env); \
             (grep -q '^DB_PASSWORD=' .env && sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env || echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env); \
             (grep -q '^APP_URL=' .env && sed -i 's|^APP_URL=.*|APP_URL=https://${{ secrets.EC2_HOST }}.sslip.io|' .env || echo 'APP_URL=https://${{ secrets.EC2_HOST }}.sslip.io' >> .env); \
+            (grep -q '^FRONTEND_URL=' .env && sed -i 's|^FRONTEND_URL=.*|FRONTEND_URL=https://professorccs260.click|' .env || echo 'FRONTEND_URL=https://professorccs260.click' >> .env); \
             (grep -q '^FILESYSTEM_DISK=' .env && sed -i 's/^FILESYSTEM_DISK=.*/FILESYSTEM_DISK=s3/' .env || echo 'FILESYSTEM_DISK=s3' >> .env); \
             (grep -q '^S3_BUCKET=' .env && sed -i 's|^S3_BUCKET=.*|S3_BUCKET=${{ secrets.S3_BUCKET }}|' .env || echo 'S3_BUCKET=${{ secrets.S3_BUCKET }}' >> .env); \
             (grep -q '^S3_BUCKET_PROD=' .env && sed -i 's|^S3_BUCKET_PROD=.*|S3_BUCKET_PROD=${{ secrets.S3_BUCKET }}|' .env || echo 'S3_BUCKET_PROD=${{ secrets.S3_BUCKET }}' >> .env); \
