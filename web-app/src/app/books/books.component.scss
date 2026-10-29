@@ -351,7 +351,7 @@
   padding: spacing.$spacing-small spacing.$spacing-medium;
   border: 1px solid colors.$colors-border;
   border-radius: spacing.$border-radius-small;
-  background-color: colors.$colors-white;
+  background-color: colors.$colors-surface;
   color: colors.$colors-text-primary;
   @include fonts.fonts-body;
   cursor: pointer;
@@ -401,7 +401,7 @@
 
   .mat-mdc-form-field {
     .mat-mdc-text-field-wrapper {
-      background-color: colors.$colors-white;
+      background-color: colors.$colors-surface;
     }
 
     .mat-mdc-form-field-label {

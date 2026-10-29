@@ -9,6 +9,9 @@ declare const process: {
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4444";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost";
+const SEED_USER_EMAIL = process.env.SEED_USER_EMAIL;
+const SEED_USER_PASSWORD = process.env.SEED_USER_PASSWORD;
+const SEED_USER_NAME = process.env.SEED_USER_NAME || "Test User";
 
 test.describe("Deployment Verification", () => {
 	test("Laravel landing page should load", async ({ page }: { page: Page }) => {
@@ -141,12 +144,16 @@ test.describe("Deployment Verification", () => {
 	}: {
 		request: APIRequestContext;
 	}) => {
-		// Test login with credentials from UsersSeeder
-		// Email: testuser@test.com, Password: password12345
+		if (!SEED_USER_EMAIL || !SEED_USER_PASSWORD) {
+			throw new Error(
+				"SEED_USER_EMAIL and SEED_USER_PASSWORD must be set (backend/.env locally, GitHub secrets in CI).",
+			);
+		}
+
 		const response = await request.post(`${BACKEND_URL}/api/login`, {
 			data: {
-				email: "testuser@test.com",
-				password: "password12345",
+				email: SEED_USER_EMAIL,
+				password: SEED_USER_PASSWORD,
 			},
 		});
 
@@ -174,7 +181,7 @@ test.describe("Deployment Verification", () => {
 		expect(body.success).toBe(true);
 		expect(body.results).toBeTruthy();
 		expect(body.results.token).toBeTruthy();
-		expect(body.results.name).toBe("Test User");
+		expect(body.results.name).toBe(SEED_USER_NAME);
 		expect(body.message).toContain("login successfully");
 
 		// Verify CORS headers are present

@@ -9,6 +9,20 @@
     <link rel="alternate icon" href="favicon.ico" />
       <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.classList.add('theme-' + theme);
+        } catch (e) {}
+      })();
+    </script>
 </head>
   <body>
     <app-root></app-root>

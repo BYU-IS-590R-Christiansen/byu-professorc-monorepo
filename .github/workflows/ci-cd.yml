@@ -196,6 +196,87 @@ jobs:
             ([ -z '${{ secrets.GEMINI_API_KEY }}' ] || (grep -q '^GEMINI_API_KEY=' .env && sed -i 's|^GEMINI_API_KEY=.*|GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}|' .env || echo 'GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}' >> .env)); \
             true"
 
+      - name: Inject seeded admin user credentials
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          SEED_USER_NAME: ${{ secrets.SEED_USER_NAME }}
+          SEED_USER_EMAIL: ${{ secrets.SEED_USER_EMAIL }}
+          SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
+        run: |
+          SEED_ENV_FILE="$(mktemp)"
+          export SEED_ENV_FILE
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          def laravel_quote(value: str) -> str:
+              escaped = (
+                  value.replace("\\", "\\\\")
+                  .replace('"', '\\"')
+                  .replace("$", "\\$")
+              )
+              return f'"{escaped}"'
+
+          email = os.environ.get("SEED_USER_EMAIL", "").strip()
+          password = os.environ.get("SEED_USER_PASSWORD", "")
+          name = os.environ.get("SEED_USER_NAME", "").strip() or "Test User"
+          if not email or not password:
+              raise SystemExit(
+                  "GitHub secrets SEED_USER_EMAIL and SEED_USER_PASSWORD are required "
+                  "so migrate --seed and Playwright use the same admin user."
+              )
+
+          Path(os.environ["SEED_ENV_FILE"]).write_text(
+              "\n".join(
+                  [
+                      f"SEED_USER_NAME={laravel_quote(name)}",
+                      f"SEED_USER_EMAIL={laravel_quote(email)}",
+                      f"SEED_USER_PASSWORD={laravel_quote(password)}",
+                      "",
+                  ]
+              )
+          )
+          PY
+          scp -o StrictHostKeyChecking=no "$SEED_ENV_FILE" ubuntu@"$EC2_HOST":/tmp/seed-user.env
+          rm -f "$SEED_ENV_FILE"
+          ssh -o StrictHostKeyChecking=no ubuntu@"$EC2_HOST" << 'REMOTE'
+          set -e
+          php << 'PHP'
+          <?php
+          $envPath = '/var/www/html/api/.env';
+          $incomingPath = '/tmp/seed-user.env';
+          $updates = [];
+          foreach (file($incomingPath, FILE_IGNORE_NEW_LINES) as $line) {
+              if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
+                  continue;
+              }
+              [$key, $value] = explode('=', $line, 2);
+              $updates[$key] = $value;
+          }
+          $lines = is_file($envPath) ? file($envPath, FILE_IGNORE_NEW_LINES) : [];
+          $seen = [];
+          $out = [];
+          foreach ($lines as $line) {
+              if (str_contains($line, '=') && !str_starts_with(ltrim($line), '#')) {
+                  $key = explode('=', $line, 2)[0];
+                  if (array_key_exists($key, $updates)) {
+                      $out[] = $key . '=' . $updates[$key];
+                      $seen[$key] = true;
+                      continue;
+                  }
+              }
+              $out[] = $line;
+          }
+          foreach ($updates as $key => $value) {
+              if (!isset($seen[$key])) {
+                  $out[] = $key . '=' . $value;
+              }
+          }
+          file_put_contents($envPath, implode("\n", $out) . "\n");
+          PHP
+          rm -f /tmp/seed-user.env
+          REMOTE
+
       - name: Migrate and restart backend
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'REMOTE'
@@ -270,6 +351,9 @@ jobs:
         env:
           BACKEND_URL: http://${{ secrets.EC2_HOST }}:4444
           FRONTEND_URL: https://${{ secrets.EC2_HOST }}.sslip.io
+          SEED_USER_EMAIL: ${{ secrets.SEED_USER_EMAIL }}
+          SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
+          SEED_USER_NAME: ${{ secrets.SEED_USER_NAME }}
         run: npx playwright test --reporter=list,html
       - uses: actions/upload-artifact@v4
         if: always()

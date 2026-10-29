@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthStore } from './core/stores/auth.store';
 import { UserStore } from './core/stores/user.store';
 import { UserService } from './core/services/user.service';
+import { ThemeService } from './core/services/theme.service';
 import {
   FormBuilder,
   FormGroup,
@@ -54,11 +55,12 @@ export class AppComponent implements OnInit {
   private authStore = inject(AuthStore);
   protected userStore = inject(UserStore);
   private userService = inject(UserService);
+  private themeService = inject(ThemeService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
 
-  theme = signal<'light' | 'dark'>('dark');
+  theme = this.themeService.theme;
   profileDialog = signal(false);
   profileIsUploading = signal(false);
   verificationEmailLoading = signal(false);
@@ -119,7 +121,7 @@ export class AppComponent implements OnInit {
   }
 
   changeTheme(): void {
-    this.theme.set(this.theme() === 'light' ? 'dark' : 'light');
+    this.themeService.toggle();
   }
 
   logout(): void {

@@ -5,11 +5,11 @@
 
 html {
   --app-font-family: #{fonts.$main-typography};
+  @include colors.colors-theme-light;
 
   @include mat.theme(
     (
       color: (
-        theme-type: light,
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
@@ -17,6 +17,10 @@ html {
       density: 0,
     )
   );
+}
+
+html.theme-dark {
+  @include colors.colors-theme-dark;
 }
 
 * {
