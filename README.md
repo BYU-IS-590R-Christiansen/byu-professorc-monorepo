@@ -53,22 +53,12 @@ This is required because the production Angular app makes direct API calls (no p
 - `AWS_ACCESS_KEY_ID`: AWS access key for AWS services
 - `AWS_SECRET_ACCESS_KEY`: AWS secret key for AWS services
 - `AWS_REGION`: AWS region for AWS services
-- `MAIL_MAILER`: Should be set to `smtp`
-- `MAIL_HOST`: Set to `smtp.gmail.com`
-- `MAIL_PORT`: Set to `587`
-- `MAIL_USERNAME`: Your full Gmail address
-- `MAIL_PASSWORD`: Your [Google App Password](https://support.google.com/accounts/answer/185833?hl=en) (see instructions below)
-- `MAIL_ENCRYPTION`: Should be `tls`
-- `MAIL_FROM_ADDRESS`: The sender's email address (usually same as your Gmail)
-- `MAIL_FROM_NAME`: Sender's name
-
-**To generate a Google App Password:**
-
-1. Go to your [Google Account Security Page](https://myaccount.google.com/security).
-2. Ensure 2-Step Verification is enabled.
-3. Under "Signing in to Google", select **App passwords**.
-4. Follow the instructions to generate a 16-digit App Password. Use this password for `MAIL_PASSWORD` above.
-5. For more info, see [Google's guide](https://support.google.com/accounts/answer/185833?hl=en).
+- `MAIL_MAILER`: `mailgun`
+- `MAIL_FROM_ADDRESS`: Sender on the Mailgun domain (sandbox or verified prod domain)
+- `MAIL_FROM_NAME`: Sender display name
+- `MAILGUN_DOMAIN`: Mailgun sending domain
+- `MAILGUN_SECRET`: Mailgun private API key
+- `MAILGUN_ENDPOINT`: `api.mailgun.net`
 
 #### AWS IAM Setup
 

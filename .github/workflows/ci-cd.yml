@@ -194,6 +194,12 @@ jobs:
             ([ -z '${{ secrets.APP_DEBUG }}' ] || (grep -q '^APP_DEBUG=' .env && sed -i 's/^APP_DEBUG=.*/APP_DEBUG=${{ secrets.APP_DEBUG }}/' .env || echo 'APP_DEBUG=${{ secrets.APP_DEBUG }}' >> .env)); \
             ([ -z '${{ secrets.OPENAI_API_KEY }}' ] || (grep -q '^OPENAI_API_KEY=' .env && sed -i 's|^OPENAI_API_KEY=.*|OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}|' .env || echo 'OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}' >> .env)); \
             ([ -z '${{ secrets.GEMINI_API_KEY }}' ] || (grep -q '^GEMINI_API_KEY=' .env && sed -i 's|^GEMINI_API_KEY=.*|GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}|' .env || echo 'GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}' >> .env)); \
+            (grep -q '^MAIL_MAILER=' .env && sed -i 's/^MAIL_MAILER=.*/MAIL_MAILER=${{ secrets.MAIL_MAILER || 'mailgun' }}/' .env || echo 'MAIL_MAILER=${{ secrets.MAIL_MAILER || 'mailgun' }}' >> .env); \
+            ([ -z '${{ secrets.MAIL_FROM_ADDRESS }}' ] || (grep -q '^MAIL_FROM_ADDRESS=' .env && sed -i 's|^MAIL_FROM_ADDRESS=.*|MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}|' .env || echo 'MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}' >> .env)); \
+            ([ -z '${{ secrets.MAIL_FROM_NAME }}' ] || (grep -q '^MAIL_FROM_NAME=' .env && sed -i 's|^MAIL_FROM_NAME=.*|MAIL_FROM_NAME=${{ secrets.MAIL_FROM_NAME }}|' .env || echo 'MAIL_FROM_NAME=${{ secrets.MAIL_FROM_NAME }}' >> .env)); \
+            ([ -z '${{ secrets.MAILGUN_DOMAIN }}' ] || (grep -q '^MAILGUN_DOMAIN=' .env && sed -i 's|^MAILGUN_DOMAIN=.*|MAILGUN_DOMAIN=${{ secrets.MAILGUN_DOMAIN }}|' .env || echo 'MAILGUN_DOMAIN=${{ secrets.MAILGUN_DOMAIN }}' >> .env)); \
+            ([ -z '${{ secrets.MAILGUN_SECRET }}' ] || (grep -q '^MAILGUN_SECRET=' .env && sed -i 's|^MAILGUN_SECRET=.*|MAILGUN_SECRET=${{ secrets.MAILGUN_SECRET }}|' .env || echo 'MAILGUN_SECRET=${{ secrets.MAILGUN_SECRET }}' >> .env)); \
+            ([ -z '${{ secrets.MAILGUN_ENDPOINT }}' ] || (grep -q '^MAILGUN_ENDPOINT=' .env && sed -i 's|^MAILGUN_ENDPOINT=.*|MAILGUN_ENDPOINT=${{ secrets.MAILGUN_ENDPOINT }}|' .env || echo 'MAILGUN_ENDPOINT=${{ secrets.MAILGUN_ENDPOINT }}' >> .env)); \
             true"
 
       - name: Inject seeded admin user credentials

@@ -5,14 +5,10 @@
         <mat-icon>menu_book</mat-icon>
       </div>
       <h1>Welcome back</h1>
-      <p>Sign in to continue to BYU 590R</p>
+      <p>Sign in to continue to BYU</p>
     </div>
 
-    <form
-      class="login-form"
-      [formGroup]="loginForm"
-      (ngSubmit)="submitLogin()"
-    >
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Email</mat-label>
         <mat-icon matPrefix>mail_outline</mat-icon>
@@ -22,7 +18,9 @@
           formControlName="email"
           autocomplete="email"
         />
-        @if (loginForm.get("email")?.invalid && loginForm.get("email")?.touched) {
+        @if (
+          loginForm.get("email")?.invalid && loginForm.get("email")?.touched
+        ) {
           <mat-error>Enter a valid email address</mat-error>
         }
       </mat-form-field>
@@ -302,7 +300,9 @@
                 registerForm.get("c_password")?.touched
               ) {
                 <mat-error>
-                  @if (registerForm.get("c_password")?.hasError("passwordMismatch")) {
+                  @if (
+                    registerForm.get("c_password")?.hasError("passwordMismatch")
+                  ) {
                     Passwords do not match
                   } @else {
                     Confirm your password
