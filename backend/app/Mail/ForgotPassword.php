@@ -24,7 +24,7 @@ class ForgotPassword extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('webmaster@localhost.com', 'Webmaster'),
+            from: new Address(config('mail.from.address'), config('mail.from.name', 'BYU')),
             subject: 'Forgot Password',
         );
     }

@@ -37,7 +37,7 @@ class BooksMail extends Mailable
             text: 'mail.books-list-text',
             with: [
                 'books' => $this->books,
-                'appName' => config('app.name'),
+                'appName' => config('mail.from.name', 'BYU'),
                 'appUrl' => rtrim((string) config('app.url'), '/'),
                 'generatedAt' => $generatedAt,
                 'titleCount' => $this->books->count(),
