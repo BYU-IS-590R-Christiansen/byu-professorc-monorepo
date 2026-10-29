@@ -14,7 +14,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
@@ -29,7 +28,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
   ],
@@ -41,7 +39,6 @@ export class LoginComponent {
   private authStore = inject(AuthStore);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
   loginForm: FormGroup;
@@ -50,6 +47,9 @@ export class LoginComponent {
 
   isLoading = signal(false);
   errorMsg = signal('');
+  hidePassword = signal(true);
+  hideRegisterPassword = signal(true);
+  hideRegisterConfirm = signal(true);
   passwordResetDialog = signal(false);
   registerDialog = signal(false);
   submitForgotPasswordLoading = signal(false);
@@ -96,6 +96,7 @@ export class LoginComponent {
   }
 
   submitLogin(): void {
+    this.loginForm.markAllAsTouched();
     if (!this.loginForm.valid) {
       return;
     }
@@ -121,6 +122,7 @@ export class LoginComponent {
   }
 
   submitForgotPassword(): void {
+    this.forgotPasswordForm.markAllAsTouched();
     if (!this.forgotPasswordForm.valid) {
       return;
     }
@@ -149,6 +151,7 @@ export class LoginComponent {
   }
 
   submitRegister(): void {
+    this.registerForm.markAllAsTouched();
     if (!this.registerForm.valid) {
       return;
     }

@@ -73,6 +73,10 @@
 
 .app-main {
   padding: spacing.$spacing-large;
+
+  &--unauthenticated {
+    padding: 0;
+  }
 }
 
 .modal {

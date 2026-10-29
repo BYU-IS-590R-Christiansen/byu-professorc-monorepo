@@ -2,142 +2,208 @@
 @use '../../../assets/styles/spacing' as spacing;
 @use '../../../assets/styles/fonts' as fonts;
 
-.login-page-content {
+.login-page {
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  padding: spacing.$spacing-medium;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(25, 118, 210, 0.14),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 111, 0, 0.1),
+      transparent 38%
+    ),
+    colors.$colors-background;
 }
 
-.button-title {
-  margin: 0;
-  color: colors.$colors-white;
-  @include fonts.fonts-buttons;
-}
-
-.login-box {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: colors.$colors-charcoal;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-  row-gap: spacing.$spacing-medium-large;
-  padding: spacing.$spacing-medium-large;
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: spacing.$spacing-medium-large spacing.$spacing-medium-large
+    spacing.$spacing-medium;
   border-radius: spacing.$border-radius-medium;
+  background-color: colors.$colors-surface;
+  color: colors.$colors-text-primary;
+  box-shadow: 0 16px 40px rgba(33, 33, 33, 0.12);
 }
 
-@media screen and (min-width: 769px) {
-  .login-box {
-    width: 750px;
-    height: 50vh;
+.login-brand {
+  text-align: center;
+  margin-bottom: spacing.$spacing-medium-large;
+
+  h1 {
+    margin: 0 0 spacing.$spacing-extra-small;
+    color: colors.$colors-text-primary;
+    @include fonts.fonts-h2;
+  }
+
+  p {
+    margin: 0;
+    color: colors.$colors-text-secondary;
+    @include fonts.fonts-body;
   }
 }
 
-@media screen and (min-width: 1200px) {
-  .login-box {
-    width: 500px;
-    height: unset;
+.login-brand-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto spacing.$spacing-medium;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: colors.$colors-primary;
+  color: colors.$colors-white;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
   }
 }
 
-.input-container {
-  width: 100%;
-  max-width: 400px;
+.login-form {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  row-gap: spacing.$spacing-medium;
-}
-
-.button-group {
-  width: 100%;
-  display: flex;
-  column-gap: spacing.$spacing-extra-small;
-  padding: spacing.$spacing-medium 0;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.alert {
-  cursor: pointer;
-  margin-top: spacing.$spacing-medium;
-}
-
-.alert-danger {
-  background-color: rgba(211, 47, 47, 0.15);
-  color: #ffcdd2;
-  border: 1px solid colors.$colors-error;
-  border-radius: spacing.$border-radius-small;
-  padding: spacing.$spacing-small spacing.$spacing-medium;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-dialog {
-  position: relative;
-  width: 90%;
-  max-width: 500px;
-}
-
-.modal-content {
-  background-color: colors.$colors-charcoal;
-  color: colors.$colors-white;
-  border-radius: spacing.$border-radius-medium;
+  gap: spacing.$spacing-small;
 }
 
 .full-width {
   width: 100%;
 }
 
-::ng-deep {
-  .mat-mdc-card {
-    background-color: colors.$colors-charcoal !important;
-    color: colors.$colors-white !important;
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: spacing.$spacing-small;
+  margin-bottom: spacing.$spacing-small;
+  padding: spacing.$spacing-small spacing.$spacing-small
+    spacing.$spacing-small spacing.$spacing-medium;
+  border-radius: spacing.$border-radius-small;
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px solid colors.$colors-error;
+  color: colors.$colors-error;
+  @include fonts.fonts-caption;
+
+  > mat-icon {
+    flex-shrink: 0;
   }
-  
-  .mat-mdc-card-title,
-  .mat-mdc-card-subtitle {
-    color: colors.$colors-white !important;
+
+  span {
+    flex: 1;
+  }
+}
+
+.login-submit,
+.login-register {
+  width: 100%;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: spacing.$spacing-small;
+  @include fonts.fonts-buttons;
+}
+
+.login-submit {
+  margin-top: spacing.$spacing-small;
+
+  mat-spinner {
+    --mdc-circular-progress-active-indicator-color: #{colors.$colors-white};
+  }
+}
+
+.login-secondary {
+  display: flex;
+  justify-content: center;
+  margin-top: spacing.$spacing-small;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: spacing.$spacing-small;
+  margin: spacing.$spacing-medium 0;
+  color: colors.$colors-text-secondary;
+  @include fonts.fonts-caption;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: colors.$colors-divider;
+  }
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: spacing.$spacing-medium;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 440px;
+}
+
+.modal-content {
+  background-color: colors.$colors-surface;
+  color: colors.$colors-text-primary;
+  border-radius: spacing.$border-radius-medium;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: spacing.$spacing-medium spacing.$spacing-medium 0
+    spacing.$spacing-medium-large;
+
+  h2 {
+    margin: 0;
+    color: colors.$colors-text-primary;
     @include fonts.fonts-h3;
   }
-  
-  .mat-mdc-form-field {
-    .mat-mdc-text-field-wrapper {
-      background-color: colors.$colors-dark-grey;
-    }
-    
-    .mat-mdc-form-field-label {
-      color: colors.$colors-white !important;
-      @include fonts.fonts-body;
-    }
-    
-    .mat-mdc-input-element {
-      color: colors.$colors-white !important;
-      @include fonts.fonts-body;
-    }
-    
-    .mat-mdc-form-field-error {
-      color: colors.$colors-error !important;
-      @include fonts.fonts-caption;
-    }
+}
+
+.modal-copy {
+  margin: 0 0 spacing.$spacing-medium;
+  color: colors.$colors-text-secondary;
+  @include fonts.fonts-body;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-card-actions {
+  gap: spacing.$spacing-small;
+  padding: spacing.$spacing-small spacing.$spacing-medium
+    spacing.$spacing-medium;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: spacing.$spacing-small;
   }
-  
-  .mat-mdc-snack-bar-container {
-    background-color: colors.$colors-charcoal !important;
-    color: colors.$colors-white !important;
+
+  mat-spinner {
+    --mdc-circular-progress-active-indicator-color: #{colors.$colors-white};
   }
 }

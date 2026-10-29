@@ -47,7 +47,10 @@
   </mat-toolbar>
   }
 
-  <main class="app-main">
+  <main
+    class="app-main"
+    [class.app-main--unauthenticated]="!isAuthenticated"
+  >
     @if (isAuthenticated) {
     <router-outlet></router-outlet>
     } @else {
