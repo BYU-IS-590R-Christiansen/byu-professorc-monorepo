@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Book;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,6 +18,8 @@ class BooksSeeder extends Seeder
     public function run()
     {
        
+        $owner = User::where('email', 'testuser@test.com')->firstOrFail();
+
         $books = [
             [
                 'genre_id' => 4,
@@ -133,8 +136,10 @@ class BooksSeeder extends Seeder
 
         ];
         foreach ($books as $book) {
+            $book['user_id'] = $owner->id;
             Book::updateOrCreate(
                 [
+                    'user_id' => $owner->id,
                     'name' => $book['name'],
                     'description' => $book['description']
                 ],

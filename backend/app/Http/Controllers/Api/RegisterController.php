@@ -33,6 +33,7 @@ class RegisterController extends BaseController
         $user = User::create($input);
         $token = $user->createToken('MyApp');
         $success['token'] = $token->plainTextToken;
+        $success['id'] = $user->id;
         $success['name'] = $user->name;
 
         return $this->sendResponse($success, 'User register successfully.');
@@ -54,6 +55,7 @@ class RegisterController extends BaseController
         $user->save();
         $token = $user->createToken('MyApp');
         $success['token'] = $token->plainTextToken;
+        $success['id'] = $user->id;
         $success['name'] = $user->name;
         $success['avatar'] = null;
         if (isset($user->avatar)) {

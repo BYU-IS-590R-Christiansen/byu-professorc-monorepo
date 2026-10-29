@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\BooksMail;
 use App\Models\Book;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -37,7 +38,12 @@ class BooksCommand extends Command
             return Command::FAILURE;
         }
 
-        $books = Book::where('name', 'like', 'Harry %')->get();
+        $booksQuery = Book::where('name', 'like', 'Harry %');
+        $owner = User::where('email', $sendToEmail)->first();
+        if ($owner) {
+            $booksQuery->where('user_id', $owner->id);
+        }
+        $books = $booksQuery->get();
 
         if ($books->count() > 0) {
             //Send one main list of all books email to management

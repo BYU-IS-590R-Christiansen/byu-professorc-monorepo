@@ -252,7 +252,10 @@ class BookController extends BaseController
      */
     public function index()
     {
-        $books = Book::orderBy('name', 'asc')->with(['authors.phones', 'genre'])->get();
+        $books = $this->ownedBooksQuery()
+            ->orderBy('name', 'asc')
+            ->with(['authors.phones', 'genre'])
+            ->get();
 
         foreach ($books as $book) {
             $book->file = $this->getS3Url($book->file);
@@ -286,6 +289,7 @@ class BookController extends BaseController
         }
 
         $book = new Book;
+        $book->user_id = Auth::id();
 
         if ($request->hasFile('file')) {
             try {
@@ -341,7 +345,7 @@ class BookController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-        $book = Book::findOrFail($id);
+        $book = $this->ownedBookOrFail($id);
 
         if ($request->hasFile('file')) {
             try {
@@ -381,7 +385,7 @@ class BookController extends BaseController
      */
     public function update(Request $request, $id)
     {
-        $book = Book::findOrFail($id);
+        $book = $this->ownedBookOrFail($id);
 
         // `gte:checked_qty` compares to another attribute; the app does not send `checked_qty`.
         // Use the persisted value so inventory_total_qty >= copies currently checked out.
@@ -416,7 +420,7 @@ class BookController extends BaseController
      */
     public function destroy($id)
     {
-        $book = Book::findOrFail($id);
+        $book = $this->ownedBookOrFail($id);
         Storage::disk('s3')->delete($book->file);
         $book->delete();
 
@@ -436,7 +440,7 @@ class BookController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-        $book = Book::findOrFail($id);
+        $book = $this->ownedBookOrFail($id);
         $book->checked_qty = $book->checked_qty + 1;
 
         if ($book->checked_qty > $book->inventory_total_qty) {
@@ -458,7 +462,7 @@ class BookController extends BaseController
 
         $book->save();
 
-        $book = Book::findOrFail($id)->load(['checkouts' => function ($query) {
+        $book = $this->ownedBookOrFail($id)->load(['checkouts' => function ($query) {
             $query->whereNull('checkin_date');
         }]);
         $success['book'] = $book;
@@ -494,7 +498,7 @@ class BookController extends BaseController
 
     public function returnBook($id)
     {
-        $book = Book::findOrFail($id);
+        $book = $this->ownedBookOrFail($id);
         
         $authUser = Auth::user();
         $user = User::findOrFail($authUser->id);
@@ -526,11 +530,21 @@ class BookController extends BaseController
 
         $book->save();
 
-        $book = Book::findOrFail($id)->load(['checkouts' => function ($query) {
+        $book = $this->ownedBookOrFail($id)->load(['checkouts' => function ($query) {
             $query->whereNull('checkin_date');
         }]);
         $success['book'] = $book;
         return $this->sendResponse($success, 'Book Returned');
+    }
+
+    private function ownedBooksQuery()
+    {
+        return Book::ownedBy((int) Auth::id());
+    }
+
+    private function ownedBookOrFail($id): Book
+    {
+        return $this->ownedBooksQuery()->findOrFail($id);
     }
 }
 

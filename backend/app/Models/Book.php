@@ -13,6 +13,7 @@ class Book extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'name',
         'description',
         'file',
@@ -23,9 +24,19 @@ class Book extends Model
         'updated_at'
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function genre(): BelongsTo
     {
         return $this->belongsTo(Genre::class, 'genre_id');
+    }
+
+    public function scopeOwnedBy($query, int $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 
     public function authors(): BelongsToMany
