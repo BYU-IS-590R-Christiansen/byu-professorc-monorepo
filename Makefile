@@ -8,7 +8,7 @@ start:
 	@echo "Checking Laravel backend configuration..."
 	@$(MAKE) setup-backend
 	@echo "Installing Laravel backend dependencies locally..."
-	cd backend && composer install
+	cd backend && composer install --ignore-platform-req=php
 	@echo "Starting Laravel backend with MySQL..."
 	cd backend && docker compose up -d --build
 	@echo "Waiting for database to be ready..."
