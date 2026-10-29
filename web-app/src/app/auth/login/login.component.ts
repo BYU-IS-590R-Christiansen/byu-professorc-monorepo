@@ -88,11 +88,21 @@ export class LoginComponent {
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const cPassword = form.get('c_password');
-    if (password && cPassword && password.value !== cPassword.value) {
-      cPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
+    if (!password || !cPassword) {
+      return null;
     }
-    return null;
+
+    const mismatch = password.value !== cPassword.value;
+    const errors = { ...(cPassword.errors ?? {}) };
+
+    if (mismatch) {
+      errors['passwordMismatch'] = true;
+    } else {
+      delete errors['passwordMismatch'];
+    }
+
+    cPassword.setErrors(Object.keys(errors).length ? errors : null);
+    return mismatch ? { passwordMismatch: true } : null;
   }
 
   submitLogin(): void {

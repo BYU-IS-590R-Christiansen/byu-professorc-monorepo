@@ -3,9 +3,8 @@ import 'package:flutter/foundation.dart';
 /// Optional compile-time override: `--dart-define=API_BASE_URL=https://example.com/api/`
 const String _kApiUrlOverride = String.fromEnvironment('API_BASE_URL');
 
-/// Production API (Terraform elastic IP + backend port). Used for `--release` when
-/// `API_BASE_URL` is not set.
-const String kProductionApiBaseUrl = 'http://52.52.126.202:4444/api/';
+/// Production API (HTTPS via Caddy). Used for `--release` when `API_BASE_URL` is not set.
+const String kProductionApiBaseUrl = 'https://professorccs260.click/api/';
 
 /// Debug/profile default when `API_BASE_URL` is unset.
 /// Android emulator → [10.0.2.2]. iOS simulator / desktop / web → [localhost].

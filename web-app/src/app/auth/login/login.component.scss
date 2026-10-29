@@ -165,6 +165,8 @@
   color: colors.$colors-text-primary;
   border-radius: spacing.$border-radius-medium;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow: auto;
 }
 
 .modal-header {
