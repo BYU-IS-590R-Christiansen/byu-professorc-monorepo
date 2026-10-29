@@ -108,11 +108,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
-      - name: Upgrade PHP on EC2
-        run: |
-          scp -o StrictHostKeyChecking=no terraform/scripts/configure-php.sh ubuntu@${{ secrets.EC2_HOST }}:/tmp/configure-php.sh
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "sudo cp /tmp/configure-php.sh /usr/local/sbin/byu-590r-configure-php.sh && sudo chmod +x /usr/local/sbin/byu-590r-configure-php.sh && sudo /usr/local/sbin/byu-590r-configure-php.sh"
-
       - name: Deploy backend
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "sudo mkdir -p /var/www/html/api && sudo chown -R ubuntu:ubuntu /var/www/html/api"

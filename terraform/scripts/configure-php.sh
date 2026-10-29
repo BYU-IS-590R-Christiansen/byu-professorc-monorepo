@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install or upgrade to PHP 8.5.12+ and apply PHP2Shell mitigations.
 # Covers CVE-2026-109618, CVE-2026-109619, and leftover CVE-2026-115560.
-# Idempotent. Safe to re-run from Terraform user_data or GitHub Actions.
+# Idempotent. Safe to re-run from Terraform user_data or once on an existing box.
 
 set -eo pipefail
 

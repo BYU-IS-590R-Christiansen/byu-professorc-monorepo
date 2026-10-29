@@ -191,7 +191,7 @@ Caddy sits in front of Apache, matching CS 260 (`reverse_proxy`) and using `<ela
 
 ### PHP 8.5.12+ (PHP2Shell)
 
-`user_data` installs PHP through `terraform/scripts/configure-php.sh` (8.5.12 or later from the Ondřej PPA, Apache `mod_php`, `session.upload_progress.enabled=0`). Existing boxes do not pick up `user_data` changes (`ignore_changes = [user_data]`). Re-run the same script on the instance, or let GitHub Actions do it on every deploy:
+`user_data` installs PHP through `terraform/scripts/configure-php.sh` (8.5.12 or later from the Ondřej PPA, Apache `mod_php`, `session.upload_progress.enabled=0`). Existing boxes do not pick up `user_data` changes (`ignore_changes = [user_data]`). Re-run the same script once on the instance:
 
 ```bash
 scp terraform/scripts/configure-php.sh ubuntu@<eip>:/tmp/configure-php.sh
