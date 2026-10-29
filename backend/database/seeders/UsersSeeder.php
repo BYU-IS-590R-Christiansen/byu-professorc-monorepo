@@ -16,21 +16,22 @@ class UsersSeeder extends Seeder
      */
     public function run()
     {
-       
+        $email = env('SEED_USER_EMAIL') ?: 'test@usertest.com';
+        $password = env('SEED_USER_PASSWORD') ?: bin2hex(random_bytes(64));
+
         $userData = [
-            'name' => 'Test User',
-            'email' => 'testuser@test.com',
+            'name' => env('SEED_USER_NAME') ?: 'Test User',
+            'email' => $email,
             'email_verified_at' => Carbon::now(),
             'avatar' => null,
             // User model hashes via `password` cast; do not bcrypt here.
-            'password' => 'password12345',
+            'password' => $password,
         ];
-        
+
         User::updateOrCreate(
-            ['email' => 'testuser@test.com'],
+            ['email' => $email],
             $userData
         );
-        
     }
 }
 

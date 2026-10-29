@@ -18,6 +18,8 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
   gap: spacing.$spacing-small;
   min-height: 56px;
@@ -36,6 +38,7 @@
 
 .nav-buttons {
   display: flex;
+  align-items: center;
   flex-shrink: 0;
   gap: spacing.$spacing-extra-small;
 
@@ -59,18 +62,33 @@
 }
 
 .avatar-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0 !important;
+  line-height: 0;
+
   .avatar-image {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    display: block;
   }
 
   mat-icon {
     color: colors.$colors-white;
-    font-size: 40px;
-    width: 40px;
-    height: 40px;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 }
 
@@ -248,6 +266,19 @@
 }
 
 ::ng-deep {
+  .avatar-button.mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 40px;
+    --mdc-icon-button-icon-size: 32px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
+    .mat-mdc-button-touch-target {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
   .mat-mdc-dialog-container {
     background-color: colors.$colors-surface !important;
     color: colors.$colors-text-primary !important;

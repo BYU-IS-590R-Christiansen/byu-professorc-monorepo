@@ -20,7 +20,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
         });
 
-        $ownerId = DB::table('users')->where('email', 'testuser@test.com')->value('id')
+        $ownerId = DB::table('users')->where('email', env('SEED_USER_EMAIL') ?: 'test@usertest.com')->value('id')
             ?? DB::table('users')->orderBy('id')->value('id');
 
         if ($ownerId) {

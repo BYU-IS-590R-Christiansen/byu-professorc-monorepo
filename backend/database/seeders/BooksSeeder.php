@@ -18,7 +18,7 @@ class BooksSeeder extends Seeder
     public function run()
     {
        
-        $owner = User::where('email', 'testuser@test.com')->firstOrFail();
+        $owner = User::where('email', env('SEED_USER_EMAIL') ?: 'test@usertest.com')->firstOrFail();
 
         $books = [
             [

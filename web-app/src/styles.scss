@@ -4,6 +4,8 @@
 @use "./assets/styles/fonts" as fonts;
 
 html {
+  --app-font-family: #{fonts.$main-typography};
+
   @include mat.theme(
     (
       color: (
@@ -34,7 +36,7 @@ body {
 body {
   background-color: colors.$colors-background;
   color: colors.$colors-text-primary;
-  font-family: fonts.$main-typography;
+  font-family: var(--app-font-family);
   font-size: fonts.$font-size-base;
   line-height: fonts.$line-height-normal;
   -webkit-font-smoothing: antialiased;
