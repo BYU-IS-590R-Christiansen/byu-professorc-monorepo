@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends BaseController
 {
@@ -21,9 +22,23 @@ class UserController extends BaseController
 
     public function uploadAvatar(Request $request)
     {
-        $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+        if ($oversized = $this->rejectOversizedUpload($request, 'image')) {
+            return $oversized;
+        }
+
+        $maxKb = $this->uploadMaxKilobytes();
+        $tooLarge = $this->imageTooLargeMessage();
+        $validator = Validator::make($request->all(), [
+            'image' => "required|image|mimes:jpeg,png,jpg,gif,svg|max:{$maxKb}",
+        ], [
+            'image.max' => $tooLarge,
+            'image.uploaded' => $tooLarge,
         ]);
+        if ($validator->fails()) {
+            $first = (string) $validator->errors()->first();
+            return $this->sendError($first !== '' ? $first : 'Validation Error.', $validator->errors(), 422);
+        }
+
         if ($request->hasFile('image')) {
             $authUser = Auth::user();
             $user = User::findOrFail($authUser->id);

@@ -15,6 +15,11 @@ import {
   getFieldError,
 } from '../core/utils/form.utils';
 import { isMobile } from '../core/utils/mobile.utils';
+import {
+  apiErrorMessage,
+  imageTooLargeMessage,
+  isImageTooLarge,
+} from '../core/utils/image-upload.utils';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -309,15 +314,19 @@ export class BooksComponent implements OnInit {
               this.bookIsCreating.set(false);
             },
             error: (error) => {
-              if (error?.error?.data && typeof error.error.data === 'object') {
+              const message = apiErrorMessage(error, 'Error creating book');
+              if (message.includes('too large')) {
+                this.newBookErrorMessage.set(message);
+              } else if (
+                error?.error?.data &&
+                typeof error.error.data === 'object'
+              ) {
                 setFormErrors(this.newBookForm, error.error.data);
                 this.newBookErrorMessage.set(
                   'Please fix the validation errors below.',
                 );
               } else {
-                this.newBookErrorMessage.set(
-                  error?.error?.message || 'Error creating book',
-                );
+                this.newBookErrorMessage.set(message);
               }
               this.bookIsCreating.set(false);
             },
@@ -379,15 +388,19 @@ export class BooksComponent implements OnInit {
         this.bookIsCreating.set(false);
       },
       error: (error) => {
-        if (error?.error?.data && typeof error.error.data === 'object') {
+        const message = apiErrorMessage(error, 'Error creating book');
+        if (message.includes('too large')) {
+          this.newBookErrorMessage.set(message);
+        } else if (
+          error?.error?.data &&
+          typeof error.error.data === 'object'
+        ) {
           setFormErrors(this.newBookForm, error.error.data);
           this.newBookErrorMessage.set(
             'Please fix the validation errors below.',
           );
         } else {
-          this.newBookErrorMessage.set(
-            error?.error?.message || 'Error creating book',
-          );
+          this.newBookErrorMessage.set(message);
         }
         this.bookIsCreating.set(false);
       },
@@ -414,15 +427,22 @@ export class BooksComponent implements OnInit {
             this.updateBookDetails(book);
           },
           error: (error) => {
-            if (error?.error?.data && typeof error.error.data === 'object') {
+            const message = apiErrorMessage(
+              error,
+              'Error updating book picture',
+            );
+            if (message.includes('too large')) {
+              this.editBookErrorMessage.set(message);
+            } else if (
+              error?.error?.data &&
+              typeof error.error.data === 'object'
+            ) {
               setFormErrors(this.editBookForm, error.error.data);
               this.editBookErrorMessage.set(
                 'Please fix the validation errors below.',
               );
             } else {
-              this.editBookErrorMessage.set(
-                error?.error?.message || 'Error updating book picture',
-              );
+              this.editBookErrorMessage.set(message);
             }
             this.bookIsUpdating.set(false);
           },
@@ -482,6 +502,15 @@ export class BooksComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
+      if (isImageTooLarge(file)) {
+        this.selectedFile.set(null);
+        this.newBookForm.patchValue({ file: null });
+        this.newBookForm.get('file')?.updateValueAndValidity();
+        this.newBookErrorMessage.set(imageTooLargeMessage());
+        input.value = '';
+        return;
+      }
+      this.newBookErrorMessage.set(null);
       this.selectedFile.set(file);
       this.newBookForm.patchValue({ file: file });
       this.newBookForm.get('file')?.updateValueAndValidity();
@@ -495,7 +524,15 @@ export class BooksComponent implements OnInit {
   onExistingBookPictureChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedEditFile.set(input.files[0]);
+      const file = input.files[0];
+      if (isImageTooLarge(file)) {
+        this.selectedEditFile.set(null);
+        this.editBookErrorMessage.set(imageTooLargeMessage());
+        input.value = '';
+        return;
+      }
+      this.editBookErrorMessage.set(null);
+      this.selectedEditFile.set(file);
     }
   }
 

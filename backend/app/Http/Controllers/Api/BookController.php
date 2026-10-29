@@ -269,17 +269,28 @@ class BookController extends BaseController
      */
     public function store(Request $request)
     {
+        if ($oversized = $this->rejectOversizedUpload($request, 'file')) {
+            return $oversized;
+        }
+
+        $maxKb = $this->uploadMaxKilobytes();
+        $tooLarge = $this->imageTooLargeMessage();
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'genre_id' => 'required',
             'description' => 'required',
-            'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'file' => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:{$maxKb}",
             'generated_file_path' => 'nullable|string',
             'inventory_total_qty' => 'required|integer|min:1'
+        ], [
+            'file.max' => $tooLarge,
+            'file.uploaded' => $tooLarge,
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+            $first = (string) $validator->errors()->first();
+            $message = str_contains($first, 'too large') ? $first : 'Validation Error.';
+            return $this->sendError($message, $validator->errors(), str_contains($first, 'too large') ? 422 : 404);
         }
 
         if (! $request->hasFile('file') && empty($request->input('generated_file_path'))) {
@@ -337,12 +348,23 @@ class BookController extends BaseController
 
     public function updateBookPicture(Request $request, $id)
     {
+        if ($oversized = $this->rejectOversizedUpload($request, 'file')) {
+            return $oversized;
+        }
+
+        $maxKb = $this->uploadMaxKilobytes();
+        $tooLarge = $this->imageTooLargeMessage();
         $validator = Validator::make($request->all(), [
-            'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg'
+            'file' => "required|image|mimes:jpeg,png,jpg,gif,svg|max:{$maxKb}",
+        ], [
+            'file.max' => $tooLarge,
+            'file.uploaded' => $tooLarge,
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+            $first = (string) $validator->errors()->first();
+            $message = str_contains($first, 'too large') ? $first : 'Validation Error.';
+            return $this->sendError($message, $validator->errors(), str_contains($first, 'too large') ? 422 : 404);
         }
 
         $book = $this->ownedBookOrFail($id);

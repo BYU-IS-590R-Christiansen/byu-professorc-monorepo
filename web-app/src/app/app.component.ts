@@ -21,6 +21,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LoginComponent } from './auth/login/login.component';
+import {
+  apiErrorMessage,
+  imageTooLargeMessage,
+  isImageTooLarge,
+} from './core/utils/image-upload.utils';
 
 @Component({
   selector: 'app-root',
@@ -152,19 +157,35 @@ export class AppComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
+    const file = input.files[0];
+    if (isImageTooLarge(file)) {
+      this.snackBar.open(imageTooLargeMessage(), 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar'],
+      });
+      input.value = '';
+      return;
+    }
+
     this.profileIsUploading.set(true);
-    this.userService.uploadAvatar(input.files[0]).subscribe({
+    this.userService.uploadAvatar(file).subscribe({
       next: (response) => {
         this.authStore.updateAvatar(response.results.avatar);
         this.profileIsUploading.set(false);
       },
-      error: () => {
-        this.snackBar.open('Error. Try again', 'Close', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar'],
-        });
+      error: (error) => {
+        this.snackBar.open(
+          apiErrorMessage(error, 'Error. Try again'),
+          'Close',
+          {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar'],
+          },
+        );
         this.profileIsUploading.set(false);
       },
     });
