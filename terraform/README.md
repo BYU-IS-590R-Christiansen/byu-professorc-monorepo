@@ -12,7 +12,7 @@ This Terraform configuration replicates the functionality of `devops/bash/setup-
 
 - **EC2 Instance**: `t2.micro` instance with:
   - Node.js 18
-  - PHP 8.3.36 with required extensions
+  - PHP 8.5.12+ with required extensions (PHP2Shell-patched; `session.upload_progress` off)
   - Composer
   - MySQL
   - Apache (Angular on `:8080`, Laravel on `:4444`)
@@ -188,6 +188,17 @@ Caddy sits in front of Apache, matching CS 260 (`reverse_proxy`) and using `<ela
 - Apache stays on loopback `:8080` (frontend) and `:4444` (API, still reachable as `http://<eip>:4444` for existing clients)
 - `user_data` installs Caddy on **new** instances. Existing boxes: `PUBLIC_IP=<eip> sudo bash terraform/scripts/configure-caddy.sh` (GitHub Actions also runs this on deploy)
 - Instance `user_data` is ignored after create so a Caddy tweak does not replace the EC2 box
+
+### PHP 8.5.12+ (PHP2Shell)
+
+`user_data` installs PHP through `terraform/scripts/configure-php.sh` (8.5.12 or later from the Ondřej PPA, Apache `mod_php`, `session.upload_progress.enabled=0`). Existing boxes do not pick up `user_data` changes (`ignore_changes = [user_data]`). Re-run the same script on the instance, or let GitHub Actions do it on every deploy:
+
+```bash
+scp terraform/scripts/configure-php.sh ubuntu@<eip>:/tmp/configure-php.sh
+ssh ubuntu@<eip> 'sudo cp /tmp/configure-php.sh /usr/local/sbin/byu-590r-configure-php.sh && sudo chmod +x /usr/local/sbin/byu-590r-configure-php.sh && sudo /usr/local/sbin/byu-590r-configure-php.sh'
+```
+
+Deploy fails if CLI PHP is older than 8.5.12 or if `php8.1` is the only binary present.
 
 ### Optional: update GitHub Actions secrets from Terraform
 

@@ -10,7 +10,7 @@ start:
 	@echo "Installing Laravel backend dependencies locally..."
 	cd backend && composer install
 	@echo "Starting Laravel backend with MySQL..."
-	cd backend && docker compose up -d
+	cd backend && docker compose up -d --build
 	@echo "Waiting for database to be ready..."
 	@cd backend && mysql_ready=0 && for i in $$(seq 1 30); do \
 		if docker compose exec -T mysql mysqladmin ping -h localhost --silent 2>/dev/null; then \

@@ -56,7 +56,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3.36"
+          php-version: "8.5.12"
           extensions: mbstring, dom, fileinfo, mysql
           coverage: none
           # Composer is installed by default; no curl to getcomposer.org
@@ -68,7 +68,7 @@ jobs:
           composer install --no-interaction --no-scripts --prefer-dist
           EXIT=$?
           set -e
-          # If lock file is incompatible with PHP 8.3 (e.g. has Symfony 8), run update so Composer resolves for platform
+          # If lock file is incompatible with PHP 8.5, run update so Composer resolves for platform
           if [ $EXIT -ne 0 ]; then
             composer update --no-interaction --no-scripts --prefer-dist
           fi
@@ -108,6 +108,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
+      - name: Upgrade PHP on EC2
+        run: |
+          scp -o StrictHostKeyChecking=no terraform/scripts/configure-php.sh ubuntu@${{ secrets.EC2_HOST }}:/tmp/configure-php.sh
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "sudo cp /tmp/configure-php.sh /usr/local/sbin/byu-590r-configure-php.sh && sudo chmod +x /usr/local/sbin/byu-590r-configure-php.sh && sudo /usr/local/sbin/byu-590r-configure-php.sh"
+
       - name: Deploy backend
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "sudo mkdir -p /var/www/html/api && sudo chown -R ubuntu:ubuntu /var/www/html/api"
@@ -127,13 +132,15 @@ jobs:
           export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
           cd /var/www/html/api
 
-          # Resolve PHP (non-interactive SSH often has minimal PATH)
+          # Resolve PHP 8.5+ only (PHP2Shell: no 8.1 / unpatched 8.3 fallback)
           PHP_BIN=$(command -v php 2>/dev/null || true)
-          [ -z "$PHP_BIN" ] && [ -x /usr/bin/php8.3 ] && PHP_BIN=/usr/bin/php8.3
-          [ -z "$PHP_BIN" ] && [ -x /usr/bin/php8.1 ] && PHP_BIN=/usr/bin/php8.1
-          [ -z "$PHP_BIN" ] && [ -x /usr/bin/php ] && PHP_BIN=/usr/bin/php
+          [ -z "$PHP_BIN" ] && [ -x /usr/bin/php8.5 ] && PHP_BIN=/usr/bin/php8.5
           if [ -z "$PHP_BIN" ]; then
-            echo "ERROR: PHP not found. Ensure EC2 was provisioned with Terraform user_data (installs php8.3)."
+            echo "ERROR: PHP 8.5 not found. configure-php.sh must run before deploy."
+            exit 1
+          fi
+          if ! $PHP_BIN -r "exit(version_compare(PHP_VERSION, '8.5.12', '>=') ? 0 : 1);"; then
+            echo "ERROR: PHP $($PHP_BIN -r 'echo PHP_VERSION;') is below 8.5.12 (PHP2Shell CVE-2026-109618 / CVE-2026-109619)"
             exit 1
           fi
 
@@ -159,7 +166,7 @@ jobs:
           sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD:-app_password}/" .env
           sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
 
-          # Install PHP dependencies; if lock file targets PHP 8.4 (Symfony 8) but server has 8.3, run update
+          # Install PHP dependencies; if the lock file cannot resolve on this PHP, run update
           set +e
           $COMPOSER_CMD install --no-interaction --no-scripts --prefer-dist --no-dev --optimize-autoloader
           EXIT=$?

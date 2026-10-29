@@ -88,11 +88,13 @@ sudo apt update && sudo apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install PHP 8.3 (8.3.36+ security release) and extensions
-sudo apt install -y software-properties-common
-sudo add-apt-repository ppa:ondrej/php -y
-sudo apt update
-sudo apt install -y php8.3 php8.3-mysql php8.3-xml php8.3-mbstring php8.3-curl php8.3-zip php8.3-gd php8.3-cli php8.3-common libapache2-mod-php8.3
+# PHP 8.5.12+ (PHP2Shell CVE-2026-109618 / CVE-2026-109619). Re-run on existing
+# boxes via CI: terraform/scripts/configure-php.sh (user_data is ignore_changes).
+sudo tee /usr/local/sbin/byu-590r-configure-php.sh > /dev/null << 'PHP_SETUP'
+${file("${path.module}/scripts/configure-php.sh")}
+PHP_SETUP
+sudo chmod +x /usr/local/sbin/byu-590r-configure-php.sh
+sudo /usr/local/sbin/byu-590r-configure-php.sh
 
 # Install Composer (non-fatal: Apache/MySQL still set up if getcomposer.org is unreachable)
 curl -sS --connect-timeout 30 https://getcomposer.org/installer | php 2>/dev/null || true
