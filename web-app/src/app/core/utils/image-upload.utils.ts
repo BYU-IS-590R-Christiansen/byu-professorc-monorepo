@@ -14,7 +14,7 @@ export function isImageTooLarge(file: File): boolean {
 export function apiErrorMessage(error: unknown, fallback: string): string {
   const body = (error as { error?: Record<string, unknown> } | undefined)
     ?.error;
-  const message = typeof body?.message === 'string' ? body.message : '';
+  const message = typeof body?.['message'] === 'string' ? body['message'] : '';
   if (message) {
     if (/failed to upload/i.test(message)) {
       return imageTooLargeMessage();
@@ -22,7 +22,7 @@ export function apiErrorMessage(error: unknown, fallback: string): string {
     return message;
   }
 
-  const data = body?.data;
+  const data = body?.['data'];
   if (data && typeof data === 'object') {
     const first = Object.values(data as Record<string, unknown>)
       .flat()
