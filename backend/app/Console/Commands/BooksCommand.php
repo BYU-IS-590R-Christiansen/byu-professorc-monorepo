@@ -43,7 +43,7 @@ class BooksCommand extends Command
         if ($owner) {
             $booksQuery->where('user_id', $owner->id);
         }
-        $books = $booksQuery->get();
+        $books = $booksQuery->with('genre')->get();
 
         if ($books->count() > 0) {
             //Send one main list of all books email to management

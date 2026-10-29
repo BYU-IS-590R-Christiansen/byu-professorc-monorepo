@@ -7,58 +7,46 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 
 class BooksMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $books;
-
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct($books)
+    public function __construct(protected Collection $books)
     {
-        $this->books = $books;
     }
 
-    /**
-     * Get the message envelope.
-     *
-     * @return \Illuminate\Mail\Mailables\Envelope
-     */
-    public function envelope()
+    public function envelope(): Envelope
     {
+        $count = $this->books->count();
+        $label = $count === 1 ? '1 title' : "{$count} titles";
+
         return new Envelope(
-            subject: 'Books Mail',
+            subject: "Your requested book inventory ({$label})",
         );
     }
 
-    /**
-     * Get the message content definition.
-     *
-     * @return \Illuminate\Mail\Mailables\Content
-     */
-    public function content()
+    public function content(): Content
     {
+        $generatedAt = Carbon::now()->timezone(config('app.timezone'))->format('F j, Y \a\t g:i A T');
+
         return new Content(
             view: 'mail.books-list',
+            text: 'mail.books-list-text',
             with: [
-                'books' => $this->books
+                'books' => $this->books,
+                'appName' => config('app.name'),
+                'appUrl' => rtrim((string) config('app.url'), '/'),
+                'generatedAt' => $generatedAt,
+                'titleCount' => $this->books->count(),
             ]
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array
-     */
-    public function attachments()
+    public function attachments(): array
     {
         return [];
     }
 }
-
